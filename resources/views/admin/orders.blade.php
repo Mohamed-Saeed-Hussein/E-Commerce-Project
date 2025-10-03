@@ -20,7 +20,11 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-medium text-gray-900 dark:text-white">Order #{{ $order->order_number }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $order->user?->name }} • ${{ number_format($order->total_amount,2) }} • {{ $order->created_at->format('Y-m-d H:i') }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ $order->user ? $order->user->name : 'Deleted User' }} • 
+                                ${{ number_format($order->total_amount,2) }} • 
+                                {{ $order->created_at->format('Y-m-d H:i') }}
+                            </div>
                         </div>
                         <form method="POST" action="{{ url('/admin/orders/' . $order->id . '/status') }}" class="flex items-center space-x-2">
                             @csrf
@@ -38,7 +42,7 @@
             @else
             <div class="text-center py-12">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No orders yet</h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Orders will appear here when customers make purchases.</p>

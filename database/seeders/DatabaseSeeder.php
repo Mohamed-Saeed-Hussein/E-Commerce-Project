@@ -34,14 +34,18 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Ensure admin user exists
-        User::updateOrCreate(
-            ['email' => 'msaidg54@gmail.com'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('msaidg54@gmail.com'),
-                'role' => 'admin',
-            ]
-        );
+        // Ensure only one admin user exists (admin@gmail.com / password: admin@gmail.com)
+        // First, remove any existing admins
+        User::where('role', 'admin')->delete();
+        
+        // Create the single admin user
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('admin@gmail.com'),
+        ]);
+        
+        // Set admin role using the protected method
+        $admin->setAdminRole();
     }
 }

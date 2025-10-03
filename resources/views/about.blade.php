@@ -8,7 +8,7 @@
         <!-- Header -->
         <div class="text-center mb-16 scroll-animate">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in-up">About Style Haven</h1>
-            <p class="text-xl text-gray-600 dark:text-gray-400 animate-fade-in-up" style="animation-delay: 0.2s;">Discover our story, mission, and the passionate team behind your favorite fashion destination</p>
+            <p class="text-xl text-gray-600 dark:text-gray-400 animate-fade-in-up" style="animation-delay: 0.2s;">Discover our story, mission, and the passionate team behind your trusted fashion destination</p>
         </div>
 
         <!-- Our Story Section -->

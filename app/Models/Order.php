@@ -58,11 +58,67 @@ class Order extends Model
                 'quantity' => $cartItem->quantity,
                 'price' => $cartItem->price
             ]);
+            
+            // Reduce stock when order is created
+            $product = Product::find($cartItem->product_id);
+            if ($product) {
+                $product->quantity -= $cartItem->quantity;
+                $product->save();
+            }
         }
 
         // Clear the cart
         Cart::clearCart($userId);
 
         return $order;
+    }
+
+    /**
+     * Update order status and handle stock management
+     */
+    public function updateStatus($newStatus)
+    {
+        $oldStatus = $this->status;
+        $this->status = $newStatus;
+        $this->save();
+
+        // Handle stock management based on status changes
+        if ($oldStatus !== $newStatus) {
+            if ($newStatus === 'cancelled' && in_array($oldStatus, ['pending', 'processing', 'shipped'])) {
+                // Restore stock when order is cancelled
+                $this->restoreStock();
+            } elseif (in_array($newStatus, ['pending', 'processing', 'shipped', 'delivered']) && $oldStatus === 'cancelled') {
+                // Reduce stock again if order is reactivated from cancelled
+                $this->reduceStock();
+            }
+        }
+    }
+
+    /**
+     * Restore stock for cancelled orders
+     */
+    public function restoreStock()
+    {
+        foreach ($this->items as $item) {
+            $product = Product::find($item->product_id);
+            if ($product) {
+                $product->quantity += $item->quantity;
+                $product->save();
+            }
+        }
+    }
+
+    /**
+     * Reduce stock for orders
+     */
+    public function reduceStock()
+    {
+        foreach ($this->items as $item) {
+            $product = Product::find($item->product_id);
+            if ($product) {
+                $product->quantity -= $item->quantity;
+                $product->save();
+            }
+        }
     }
 }

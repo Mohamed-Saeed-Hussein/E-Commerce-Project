@@ -14,19 +14,54 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Tailwind is compiled via Vite (resources/css/app.css) -->
+    
+    
+    <style>
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .animate-slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        /* Scroll-triggered animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .scroll-animate.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased dark:bg-gray-900">
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Navigation (match user header styles, admin links) -->
+        <!-- Navigation -->
         <nav class="bg-white dark:bg-gray-800 antialiased">
             <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex">
-                        <!-- Logo -->
-                        <div class="flex-shrink-0 flex items-center">
-                            <a href="{{ url('/admin') }}" class="flex items-center">
-                                <svg class="w-8 h-8 mr-2" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+
+                    <div class="flex items-center space-x-8">
+                        <div class="shrink-0">
+                            <a href="{{ url('/admin') }}" title="" class="flex items-center space-x-2">
+                                <svg class="block w-auto h-8 dark:hidden" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                                     <defs>
                                         <linearGradient id="bagSplit" x1="0%" y1="0%" x2="100%" y2="0%">
                                             <stop offset="50%" stop-color="#F7632E"/>
@@ -36,80 +71,127 @@
                                     <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplit)"/>
                                     <path d="M176 208a16 16 0 0 1-16-16v-64c0-58.5 47.5-106 106-106s106 47.5 106 106v64a16 16 0 1 1-32 0v-64c0-40.9-33.1-74-74-74s-74 33.1-74 74v64a16 16 0 0 1-16 16z" fill="#0B2C33"/>
                                 </svg>
-                                <span class="text-xl font-bold text-gray-900 dark:text-white">Style Haven Admin</span>
+                                <svg class="hidden w-auto h-8 dark:block" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                    <defs>
+                                        <linearGradient id="bagSplitDark" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="50%" stop-color="#F7632E"/>
+                                            <stop offset="50%" stop-color="#FF1F49"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplitDark)"/>
+                                    <path d="M176 208a16 16 0 0 1-16-16v-64c0-58.5 47.5-106 106-106s106 47.5 106 106v64a16 16 0 1 1-32 0v-64c0-40.9-33.1-74-74-74s-74 33.1-74 74v64a16 16 0 0 1-16 16z" fill="#ffffff"/>
+                                </svg>
+                                <span class="text-xl font-bold text-gray-900 dark:text-white">Style Haven</span>
                             </a>
                         </div>
 
-                        <!-- Navigation Links -->
                         <ul class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
-                            <li><a href="{{ url('/admin') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Dashboard</a></li>
-                            <li class="shrink-0"><a href="{{ url('/admin/products') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Products</a></li>
-                            <li class="shrink-0"><a href="{{ url('/admin/categories') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Categories</a></li>
-                            <li class="shrink-0"><a href="{{ url('/admin/orders') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Orders</a></li>
-                            <li class="shrink-0"><a href="{{ url('/admin/users') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Users</a></li>
-                            <li class="shrink-0"><a href="{{ url('/admin/messages') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Messages</a></li>
+                            <li>
+                                <a href="{{ url('/admin') }}" title="" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li class="shrink-0">
+                                <a href="{{ url('/admin/products') }}" title="" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    Products
+                                </a>
+                            </li>
+                            <li class="shrink-0">
+                                <a href="{{ url('/admin/categories') }}" title="" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    Categories
+                                </a>
+                            </li>
+                            <li class="shrink-0">
+                                <a href="{{ url('/admin/orders') }}" title="" class="text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    Orders
+                                </a>
+                            </li>
+                            <li class="shrink-0">
+                                <a href="{{ url('/admin/users') }}" title="" class="text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    View Users
+                                </a>
+                            </li>
+                            <li class="shrink-0">
+                                <a href="{{ url('/admin/messages') }}" title="" class="text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    Messages
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
-                    <!-- Right side -->
-                    <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                        <!-- Profile dropdown -->
-                        <div class="ml-3 relative">
-                            <div>
-                                <button type="button" class="bg-white dark:bg-gray-800 rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
-                                    <span class="sr-only">Open user menu</span>
-                                    <div class="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
-                                        <span class="text-sm font-medium text-white">{{ substr(session('auth.name', 'A'), 0, 1) }}</span>
-                                    </div>
-                                </button>
-                            </div>
+                    <div class="flex items-center lg:space-x-2">
 
-                            <!-- Dropdown menu -->
-                            <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-                                <a href="{{ url('/profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">My Profile</a>
-                                <a href="{{ url('/logout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">Logout</a>
+                        @if(session('auth.user_id'))
+                        <button id="userDropdownButton1" data-dropdown-toggle="userDropdown1" type="button" class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white transition-all duration-200 hover:scale-105 hover:shadow-md">
+                            <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/>
+                            </svg>              
+                            Account
+                            <svg class="w-4 h-4 text-gray-900 dark:text-white ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                            </svg> 
+                        </button>
+
+                        <div id="userDropdown1" class="hidden z-10 w-56 divide-y divide-gray-100 overflow-hidden overflow-y-auto rounded-lg bg-white antialiased shadow dark:divide-gray-600 dark:bg-gray-700">
+                            <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                <div class="font-medium truncate">{{ session('auth.name', 'Admin') }}</div>
+                                <div class="font-medium truncate">{{ session('auth.email', 'admin@example.com') }}</div>
+                            </div>
+                            <ul class="p-2 text-start text-sm font-medium text-gray-900 dark:text-white">
+                                <li><a href="{{ url('/profile') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> My Profile </a></li>
+                                <li><a href="{{ url('/admin') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> Admin Dashboard </a></li>
+                            </ul>
+                    
+                            <div class="p-2 text-sm font-medium text-gray-900 dark:text-white">
+                                <a href="{{ url('/logout') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"> Sign Out </a>
                             </div>
                         </div>
-                    </div>
+                        @else
+                        <a href="{{ url('/login') }}" class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white transition-all duration-200 hover:scale-105 hover:shadow-md">
+                            <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/>
+                            </svg>              
+                            Sign In
+                        </a>
+                        @endif
 
-                    <!-- Mobile menu button -->
-                    <div class="-mr-2 flex items-center sm:hidden">
-                        <button type="button" class="bg-white dark:bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" aria-controls="mobile-menu" aria-expanded="false">
-                            <span class="sr-only">Open main menu</span>
-                            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
+                        <button type="button" data-collapse-toggle="ecommerce-navbar-menu-1" aria-controls="ecommerce-navbar-menu-1" aria-expanded="false" class="inline-flex lg:hidden items-center justify-center hover:bg-gray-100 rounded-md dark:hover:bg-gray-700 p-2 text-gray-900 dark:text-white transition-all duration-200 hover:scale-105 hover:shadow-md">
+                            <span class="sr-only">
+                                Open Menu
+                            </span>
+                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
+                            </svg>                
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Mobile menu -->
-            <div class="sm:hidden" id="mobile-menu">
-                <div class="pt-2 pb-3 space-y-1">
-                    <a href="{{ url('/admin') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
-                    <a href="{{ url('/admin/products') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Products</a>
-                    <a href="{{ url('/admin/categories') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Categories</a>
-                    <a href="{{ url('/admin/orders') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Orders</a>
-                    <a href="{{ url('/admin/users') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Users</a>
-                    <a href="{{ url('/admin/messages') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Messages</a>
-                </div>
-                <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center px-4">
-                        <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
-                                <span class="text-sm font-medium text-white">{{ substr(session('auth.name', 'A'), 0, 1) }}</span>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <div class="text-base font-medium text-gray-800 dark:text-white">{{ session('auth.name', 'Admin') }}</div>
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ session('auth.email', 'admin@example.com') }}</div>
-                        </div>
-                    </div>
-                    <div class="mt-3 space-y-1">
-                        <a href="{{ url('/profile') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700">My Profile</a>
-                        <a href="{{ url('/logout') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-700">Logout</a>
-                    </div>
+                <div id="ecommerce-navbar-menu-1" class="bg-gray-50 dark:bg-gray-700 dark:border-gray-600 border border-gray-200 rounded-lg py-3 hidden px-4 mt-4">
+                    <ul class="text-gray-900 dark:text-white text-sm font-medium dark:text-white space-y-3">
+                        <li>
+                            <a href="{{ url('/admin') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/products') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Products</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/categories') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Categories</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/orders') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Orders</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/users') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">View Users</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/messages') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Messages</a>
+                        </li>
+                        @if(!session('auth.user_id'))
+                        <li>
+                            <a href="{{ url('/login') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Sign In</a>
+                        </li>
+                        @endif
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -119,56 +201,112 @@
             @yield('content')
         </main>
 
-        <!-- Footer (reuse user footer style with admin links) -->
+        <!-- Footer -->
         <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">
             <div class="mx-auto max-w-screen-xl text-center">
                 <a href="{{ url('/admin') }}" class="flex justify-center items-center text-2xl font-semibold text-gray-900 dark:text-white">
                     <svg class="mr-2 h-8" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                         <defs>
-                            <linearGradient id="bagSplitFooterAdmin" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <linearGradient id="bagSplitFooter" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="50%" stop-color="#F7632E"/>
                                 <stop offset="50%" stop-color="#FF1F49"/>
                             </linearGradient>
                         </defs>
-                        <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplitFooterAdmin)"/>
+                        <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplitFooter)"/>
                         <path d="M176 208a16 16 0 0 1-16-16v-64c0-58.5 47.5-106 106-106s106 47.5 106 106v64a16 16 0 1 1-32 0v-64c0-40.9-33.1-74-74-74s-74 33.1-74 74v64a16 16 0 0 1-16 16z" fill="#0B2C33"/>
                     </svg>
-                    Admin Panel
+                    Style Haven    
                 </a>
-                <ul class="flex flex-wrap justify-center items-center mb-6 text-gray-900 dark:text-white mt-4">
-                    <li><a href="{{ url('/admin') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Dashboard</a></li>
-                    <li><a href="{{ url('/admin/products') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Products</a></li>
-                    <li><a href="{{ url('/admin/categories') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Categories</a></li>
-                    <li><a href="{{ url('/admin/orders') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Orders</a></li>
-                    <li><a href="{{ url('/admin/users') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Users</a></li>
-                    <li><a href="{{ url('/admin/messages') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Messages</a></li>
+                <p class="my-6 text-gray-500 dark:text-gray-400">Admin panel for managing your e-commerce store. Monitor products, orders, users, and customer messages.</p>
+                <ul class="flex flex-wrap justify-center items-center mb-6 text-gray-900 dark:text-white">
+                    <li>
+                        <a href="{{ url('/admin') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/admin/products') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Products</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/admin/categories') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Categories</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/admin/orders') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Orders</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/admin/users') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">View Users</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/admin/messages') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Messages</a>
+                    </li>
                 </ul>
-                <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ date('Y') }} Style Haven Admin. All Rights Reserved.</span>
+                <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ date('Y') }} <a href="{{ url('/admin') }}" class="hover:underline">Style Haven™</a>. All Rights Reserved.</span>
             </div>
         </footer>
     </div>
 
+    <!-- Flowbite JS for dropdowns and components -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+
     <script>
-        // Profile dropdown toggle
-        document.getElementById('user-menu-button').addEventListener('click', function() {
-            const dropdown = document.querySelector('[role="menu"]');
-            dropdown.classList.toggle('hidden');
+        // Global: toggle password visibility buttons
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-toggle-password]');
+            if (!btn) return;
+            const sel = btn.getAttribute('data-toggle-password');
+            const input = document.querySelector(sel);
+            if (!input) return;
+            
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
+            
+            if (input.getAttribute('type') === 'password') {
+                // Password is currently hidden, show it (open eye)
+                input.setAttribute('type', 'text');
+                eyeOpen.classList.remove('hidden'); // Show open eye
+                eyeClosed.classList.add('hidden');   // Hide closed eye
+            } else {
+                // Password is currently visible, hide it (closed eye)
+                input.setAttribute('type', 'password');
+                eyeOpen.classList.add('hidden');     // Hide open eye
+                eyeClosed.classList.remove('hidden'); // Show closed eye
+            }
         });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('[role="menu"]');
-            const button = document.getElementById('user-menu-button');
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
+        // Global: clear all forms on page show (when navigating back/forward)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.querySelectorAll('form').forEach(function(form) { form.reset(); });
             }
         });
 
         // Mobile menu toggle
-        document.querySelector('[aria-controls="mobile-menu"]').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
+        const mobileMenuButton = document.querySelector('[data-collapse-toggle="ecommerce-navbar-menu-1"]');
+        const mobileMenu = document.getElementById('ecommerce-navbar-menu-1');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Scroll-triggered animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.scroll-animate');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate');
+                }
+            });
+        }
+
+        // Run on scroll and on load
+        window.addEventListener('scroll', handleScrollAnimations);
+        window.addEventListener('load', handleScrollAnimations);
+
     </script>
 </body>
 </html>

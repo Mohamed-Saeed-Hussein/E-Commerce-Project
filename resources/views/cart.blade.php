@@ -121,7 +121,7 @@
         <!-- Empty Cart -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center scroll-animate">
             <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
             </svg>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Your cart is empty</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6">Add some items to get started.</p>

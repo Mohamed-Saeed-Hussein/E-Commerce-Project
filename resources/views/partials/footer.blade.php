@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-md-4">
                 <h5>Style Haven</h5>
-                <p>Your favorite store for trendy fashion</p>
+                <p>Your trusted store for trendy fashion</p>
             </div>
             <div class="col-md-4">
                 <h6>Quick Links</h6>

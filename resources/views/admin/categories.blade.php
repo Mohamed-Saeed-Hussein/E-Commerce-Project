@@ -29,14 +29,14 @@
         @endif
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
-            <form method="POST" action="{{ url('/admin/categories') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <form method="POST" action="{{ url('/admin/categories') }}" class="max-w-md mx-auto">
                 @csrf
-                <div class="md:col-span-2">
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="e.g. Accessories" required>
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category Name</label>
+                    <input type="text" name="name" id="name" value="{{ old('name') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="e.g. Accessories" required>
                 </div>
-                <div>
-                    <button type="submit" class="w-full bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">Add Category</button>
+                <div class="text-center">
+                    <button type="submit" class="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200">Add Category</button>
                 </div>
             </form>
         </div>

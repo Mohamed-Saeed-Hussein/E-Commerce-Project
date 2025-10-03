@@ -33,12 +33,14 @@
 
         <!-- Form -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <form method="POST" action="{{ url('/admin/products/' . $product->id) }}" class="space-y-6">
+            <form method="POST" action="{{ url('/admin/products/' . $product->id) }}" class="max-w-2xl mx-auto space-y-6">
                 @csrf
                 @method('PUT')
+                
+                <!-- Category Selection -->
                 <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                    <select name="category_id" id="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                    <select name="category_id" id="category_id" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">-- Select category --</option>
                         @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
                             <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -46,51 +48,57 @@
                     </select>
                 </div>
                 
+                <!-- Product Name -->
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Product Name</label>
+                    <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter product name" required>
                 </div>
 
+                <!-- Price -->
                 <div>
-                    <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
+                    <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price</label>
+                    <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span class="text-gray-500 sm:text-sm">$</span>
                         </div>
-                        <input type="number" name="price" id="price" step="0.01" min="0" value="{{ old('price', $product->price) }}" class="block w-full pl-7 pr-12 border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="0.00" required>
+                        <input type="number" name="price" id="price" step="0.01" min="0" value="{{ old('price', $product->price) }}" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="0.00" required>
                     </div>
                 </div>
 
+                <!-- Description -->
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                    <textarea name="description" id="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>{{ old('description', $product->description) }}</textarea>
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                    <textarea name="description" id="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter product description" required>{{ old('description', $product->description) }}</textarea>
                 </div>
 
+                <!-- Quantity and Availability -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
-                        <input type="number" name="quantity" id="quantity" min="0" value="{{ old('quantity', $product->quantity) }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quantity</label>
+                        <input type="number" name="quantity" id="quantity" min="0" value="{{ old('quantity', $product->quantity) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="0" required>
                     </div>
 
                     <div>
-                        <label for="is_available" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Availability</label>
-                        <select name="is_available" id="is_available" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <label for="is_available" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Availability</label>
+                        <select name="is_available" id="is_available" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="1" {{ old('is_available', $product->is_available) == '1' ? 'selected' : '' }}>Available</option>
                             <option value="0" {{ old('is_available', $product->is_available) == '0' ? 'selected' : '' }}>Out of Stock</option>
                         </select>
                     </div>
                 </div>
 
+                <!-- Image URL -->
                 <div>
-                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL (Optional)</label>
-                    <input type="url" name="image" id="image" value="{{ old('image', $product->image) }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="https://example.com/image.jpg">
+                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image URL (Optional)</label>
+                    <input type="url" name="image" id="image" value="{{ old('image', $product->image) }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="https://example.com/image.jpg">
                 </div>
 
-                <div class="flex justify-end space-x-3">
-                    <a href="{{ url('/admin/products') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <!-- Action Buttons -->
+                <div class="flex justify-center space-x-4 pt-4">
+                    <a href="{{ url('/admin/products') }}" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200">
                         Cancel
                     </a>
-                    <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button type="submit" class="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200">
                         Update Product
                     </button>
                 </div>

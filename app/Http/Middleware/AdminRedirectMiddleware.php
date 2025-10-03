@@ -29,7 +29,8 @@ class AdminRedirectMiddleware
         if ($isLoggedIn && $role === 'admin') {
             $isAdminPath = str_starts_with($path, 'admin');
             $isProfilePath = $path === 'profile' || $path === 'profile/update' || $path === 'profile/delete';
-            if (!$isAdminPath && !$isProfilePath) {
+            $isLogoutPath = $path === 'logout';
+            if (!$isAdminPath && !$isProfilePath && !$isLogoutPath) {
                 return redirect('/admin');
             }
         }

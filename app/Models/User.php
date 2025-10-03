@@ -21,8 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
+
+    /**
+     * The attributes that should be guarded from mass assignment.
+     *
+     * @var list<string>
+     */
+    protected $guarded = ['role'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -63,5 +69,47 @@ class User extends Authenticatable
     {
         $this->remember_token = null;
         $this->save();
+    }
+
+    /**
+     * Set the admin role - only allowed through database operations
+     * This method should only be called by seeders or direct database operations
+     */
+    public function setAdminRole()
+    {
+        $this->role = 'admin';
+        $this->save();
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Get the user's orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the user's cart items
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * Get the user's messages
+     */
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }

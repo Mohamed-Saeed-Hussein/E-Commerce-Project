@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Users')
+@section('title', 'View Users')
 
 @section('content')
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -8,7 +8,21 @@
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Users</h1>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">Manage user accounts and emails</p>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">View user accounts and information</p>
+            <div class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-800">
+                            <strong>Note:</strong> User roles cannot be changed through this interface. Admin privileges can only be granted through database operations by the developer.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if (session('status'))
@@ -38,7 +52,7 @@
             @if($admins->count() > 0)
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($admins as $user)
-                <li class="opacity-75">
+                <li class="{{ $user->id == session('auth.user_id') ? 'opacity-75' : '' }}">
                     <div class="px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
@@ -47,45 +61,26 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ $user->name }}
+                                    @if($user->id == session('auth.user_id'))
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">(You)</span>
+                                    @endif
+                                </div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
-                                        {{ ucfirst($user->role) }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                        Admin
                                     </span>
                                     • Joined {{ $user->created_at->format('M d, Y') }}
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline-flex items-center space-x-2">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="name" value="{{ $user->name }}" class="w-40 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
-                                <input type="email" name="email" value="{{ $user->email }}" class="w-56 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
-                                <button type="submit" class="px-2 py-1 bg-primary-600 text-white rounded-md text-sm">Save</button>
-                            </form>
-
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id . '/role') }}" class="inline-flex items-center space-x-2" onchange="this.submit()">
-                                @csrf
-                                <select name="role" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5">
-                                    <option value="user" {{ $user->role==='user' ? 'selected' : '' }}>User</option>
-                                    <option value="admin" {{ $user->role==='admin' ? 'selected' : '' }}>Admin</option>
-                                </select>
-                            </form>
-
-                            @if($user->id !== session('auth.user_id'))
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </form>
+                            @if($user->id == session('auth.user_id'))
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Current User</span>
                             @else
-                            <span class="text-sm text-gray-400 dark:text-gray-500">Current User</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Admin - Read Only</span>
                             @endif
                         </div>
                     </div>
@@ -95,7 +90,7 @@
             @else
             <div class="text-center py-12">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" />
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No admins</h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No admins found.</p>
@@ -129,35 +124,10 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline-flex items-center space-x-2">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="name" value="{{ $user->name }}" class="w-40 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
-                                <input type="email" name="email" value="{{ $user->email }}" class="w-56 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
-                                <button type="submit" class="px-2 py-1 bg-primary-600 text-white rounded-md text-sm">Save</button>
-                            </form>
-
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id . '/role') }}" class="inline-flex items-center space-x-2" onchange="this.submit()">
-                                @csrf
-                                <select name="role" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5">
-                                    <option value="user" {{ $user->role==='user' ? 'selected' : '' }}>User</option>
-                                    <option value="admin" {{ $user->role==='admin' ? 'selected' : '' }}>Admin</option>
-                                </select>
-                            </form>
-
-                            @if($user->id !== session('auth.user_id'))
-                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </form>
-                            @else
-                            <span class="text-sm text-gray-400 dark:text-gray-500">Current User</span>
-                            @endif
+                            <!-- User info is read-only -->
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Read-only</span>
+                            </div>
                         </div>
                     </div>
                 </li>
@@ -166,7 +136,7 @@
             @else
             <div class="text-center py-12">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" />
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users</h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No users have registered yet.</p>
@@ -175,4 +145,5 @@
         </div>
     </div>
 </div>
+
 @endsection
