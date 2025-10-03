@@ -26,12 +26,19 @@
         </div>
         @endif
 
-        <!-- Users Table -->
-        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-            @if($users->count() > 0)
+        <!-- Admins List -->
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md mb-8">
+            <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Admins</h2>
+            </div>
+            @php
+                $admins = $users->where('role','admin');
+                $regularUsers = $users->where('role','user');
+            @endphp
+            @if($admins->count() > 0)
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach($users as $user)
-                <li>
+                @foreach($admins as $user)
+                <li class="opacity-75">
                     <div class="px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
@@ -50,7 +57,94 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-4">
+                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline-flex items-center space-x-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="name" value="{{ $user->name }}" class="w-40 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
+                                <input type="email" name="email" value="{{ $user->email }}" class="w-56 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
+                                <button type="submit" class="px-2 py-1 bg-primary-600 text-white rounded-md text-sm">Save</button>
+                            </form>
+
+                            <form method="POST" action="{{ url('/admin/users/' . $user->id . '/role') }}" class="inline-flex items-center space-x-2" onchange="this.submit()">
+                                @csrf
+                                <select name="role" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5">
+                                    <option value="user" {{ $user->role==='user' ? 'selected' : '' }}>User</option>
+                                    <option value="admin" {{ $user->role==='admin' ? 'selected' : '' }}>Admin</option>
+                                </select>
+                            </form>
+
+                            @if($user->id !== session('auth.user_id'))
+                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                            @else
+                            <span class="text-sm text-gray-400 dark:text-gray-500">Current User</span>
+                            @endif
+                        </div>
+                    </div>
+                </li>
+                @endforeach
+            </ul>
+            @else
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No admins</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No admins found.</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Users List -->
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+            <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Users</h2>
+            </div>
+            @if($regularUsers->count() > 0)
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                @foreach($regularUsers as $user)
+                <li>
+                    <div class="px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-white">{{ substr($user->name, 0, 1) }}</span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">User</span>
+                                    • Joined {{ $user->created_at->format('M d, Y') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline-flex items-center space-x-2">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="name" value="{{ $user->name }}" class="w-40 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
+                                <input type="email" name="email" value="{{ $user->email }}" class="w-56 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5" required>
+                                <button type="submit" class="px-2 py-1 bg-primary-600 text-white rounded-md text-sm">Save</button>
+                            </form>
+
+                            <form method="POST" action="{{ url('/admin/users/' . $user->id . '/role') }}" class="inline-flex items-center space-x-2" onchange="this.submit()">
+                                @csrf
+                                <select name="role" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white text-sm p-2.5">
+                                    <option value="user" {{ $user->role==='user' ? 'selected' : '' }}>User</option>
+                                    <option value="admin" {{ $user->role==='admin' ? 'selected' : '' }}>Admin</option>
+                                </select>
+                            </form>
+
                             @if($user->id !== session('auth.user_id'))
                             <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
                                 @csrf

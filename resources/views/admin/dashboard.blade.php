@@ -24,7 +24,7 @@
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Orders</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">0</dd>
+                                <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ $orderCount }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Revenue</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">$0.00</dd>
+                                <dd class="text-lg font-medium text-gray-900 dark:text-white">${{ number_format($revenue, 2) }}</dd>
                             </dl>
                         </div>
                     </div>

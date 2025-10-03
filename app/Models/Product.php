@@ -13,10 +13,16 @@ class Product extends Model
         'quantity',
         'is_available',
         'image',
+        'category_id',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'is_available' => 'boolean',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Category::class);
+    }
 }

@@ -35,6 +35,15 @@
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <form method="POST" action="{{ url('/admin/products') }}" class="space-y-6">
                 @csrf
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                    <select name="category_id" id="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">-- Select category --</option>
+                        @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
+                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>

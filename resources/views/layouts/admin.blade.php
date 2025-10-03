@@ -14,31 +14,14 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {"50":"#fef2f2","100":"#fee2e2","200":"#fecaca","300":"#fca5a5","400":"#f87171","500":"#ef4444","600":"#dc2626","700":"#b91c1c","800":"#991b1b","900":"#7f1d1d","950":"#450a0a"}
-                    }
-                },
-                fontFamily: {
-                    'body': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
-                    'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji']
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind is compiled via Vite (resources/css/app.css) -->
 </head>
 <body class="font-sans antialiased dark:bg-gray-900">
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Navigation -->
-        <nav class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
+        <!-- Navigation (match user header styles, admin links) -->
+        <nav class="bg-white dark:bg-gray-800 antialiased">
+            <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">
+                <div class="flex items-center justify-between">
                     <div class="flex">
                         <!-- Logo -->
                         <div class="flex-shrink-0 flex items-center">
@@ -58,20 +41,14 @@
                         </div>
 
                         <!-- Navigation Links -->
-                        <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                            <a href="{{ url('/admin') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-2 px-1 pt-1 border-b-2 font-medium text-sm">
-                                Dashboard
-                            </a>
-                            <a href="{{ url('/admin/products') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-2 px-1 pt-1 border-b-2 font-medium text-sm">
-                                Products
-                            </a>
-                            <a href="{{ url('/admin/users') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-2 px-1 pt-1 border-b-2 font-medium text-sm">
-                                Users
-                            </a>
-                            <a href="{{ url('/admin/orders') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-2 px-1 pt-1 border-b-2 font-medium text-sm">
-                                Orders
-                            </a>
-                        </div>
+                        <ul class="hidden lg:flex items-center justify-start gap-6 md:gap-8 py-3 sm:justify-center">
+                            <li><a href="{{ url('/admin') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Dashboard</a></li>
+                            <li class="shrink-0"><a href="{{ url('/admin/products') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Products</a></li>
+                            <li class="shrink-0"><a href="{{ url('/admin/categories') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Categories</a></li>
+                            <li class="shrink-0"><a href="{{ url('/admin/orders') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Orders</a></li>
+                            <li class="shrink-0"><a href="{{ url('/admin/users') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Users</a></li>
+                            <li class="shrink-0"><a href="{{ url('/admin/messages') }}" class="flex text-sm font-medium text-gray-900 hover:text-primary-700 dark:text-white dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Messages</a></li>
+                        </ul>
                     </div>
 
                     <!-- Right side -->
@@ -112,8 +89,10 @@
                 <div class="pt-2 pb-3 space-y-1">
                     <a href="{{ url('/admin') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
                     <a href="{{ url('/admin/products') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Products</a>
-                    <a href="{{ url('/admin/users') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Users</a>
+                    <a href="{{ url('/admin/categories') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Categories</a>
                     <a href="{{ url('/admin/orders') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Orders</a>
+                    <a href="{{ url('/admin/users') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Users</a>
+                    <a href="{{ url('/admin/messages') }}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Messages</a>
                 </div>
                 <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center px-4">
@@ -139,6 +118,34 @@
         <main>
             @yield('content')
         </main>
+
+        <!-- Footer (reuse user footer style with admin links) -->
+        <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">
+            <div class="mx-auto max-w-screen-xl text-center">
+                <a href="{{ url('/admin') }}" class="flex justify-center items-center text-2xl font-semibold text-gray-900 dark:text-white">
+                    <svg class="mr-2 h-8" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <defs>
+                            <linearGradient id="bagSplitFooterAdmin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="50%" stop-color="#F7632E"/>
+                                <stop offset="50%" stop-color="#FF1F49"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplitFooterAdmin)"/>
+                        <path d="M176 208a16 16 0 0 1-16-16v-64c0-58.5 47.5-106 106-106s106 47.5 106 106v64a16 16 0 1 1-32 0v-64c0-40.9-33.1-74-74-74s-74 33.1-74 74v64a16 16 0 0 1-16 16z" fill="#0B2C33"/>
+                    </svg>
+                    Admin Panel
+                </a>
+                <ul class="flex flex-wrap justify-center items-center mb-6 text-gray-900 dark:text-white mt-4">
+                    <li><a href="{{ url('/admin') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Dashboard</a></li>
+                    <li><a href="{{ url('/admin/products') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Products</a></li>
+                    <li><a href="{{ url('/admin/categories') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Categories</a></li>
+                    <li><a href="{{ url('/admin/orders') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Orders</a></li>
+                    <li><a href="{{ url('/admin/users') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Users</a></li>
+                    <li><a href="{{ url('/admin/messages') }}" class="mr-4 hover:underline md:mr-6 transition-all duration-200 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-105">Messages</a></li>
+                </ul>
+                <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ date('Y') }} Style Haven Admin. All Rights Reserved.</span>
+            </div>
+        </footer>
     </div>
 
     <script>

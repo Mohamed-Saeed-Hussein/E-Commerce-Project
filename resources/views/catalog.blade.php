@@ -16,16 +16,18 @@
     <div class="text-center mb-8 scroll-animate">
         <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 hover:shadow-lg transition-shadow duration-300">
             <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 bg-primary-600 text-white hover:bg-primary-700 transform hover:scale-105" data-category="all">All</button>
-            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transform hover:scale-105" data-category="shirts">Shirts</button>
-            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transform hover:scale-105" data-category="pants">Pants</button>
-            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transform hover:scale-105" data-category="shoes">Shoes</button>
+            @forelse($categories as $category)
+            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transform hover:scale-105" data-category="{{ strtolower($category->slug) }}">{{ $category->name }}</button>
+            @empty
+            <span class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">No categories available</span>
+            @endforelse
         </div>
     </div>
 
     <!-- Products Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($products as $product)
-        <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" data-category="{{ strtolower(explode(' ', $product->name)[0]) }}" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
+        <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" data-category="{{ $product->category ? strtolower($product->category->slug) : 'all' }}" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
             <div class="aspect-w-1 aspect-h-1 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                 <img src="{{ $product->image ?: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500' }}" 
                      alt="{{ $product->name }}" 
@@ -89,17 +91,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             btn.classList.add('bg-primary-600', 'text-white');
             btn.classList.remove('text-gray-600', 'hover:text-primary-600', 'dark:text-gray-300', 'dark:hover:text-primary-400');
-            
-            // Filter products
+
+            // Filter products (fallback to showing all if no matches)
             const category = btn.getAttribute('data-category');
+            let matches = 0;
             productCards.forEach(card => {
-                if (category === 'all' || card.getAttribute('data-category') === category) {
+                const isMatch = category === 'all' || card.getAttribute('data-category') === category;
+                if (isMatch) {
+                    matches++;
                     card.style.display = 'block';
                     card.classList.add('animate-fade-in-up');
                 } else {
                     card.style.display = 'none';
                 }
             });
+
+            // If nothing matched, show all as a graceful fallback
+            if (matches === 0) {
+                productCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+            }
         });
     });
     

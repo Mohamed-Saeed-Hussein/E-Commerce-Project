@@ -10,9 +10,11 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Category;
+use Illuminate\Support\Facades\File;
 
 Route::get('/', function () {
-    return redirect('/login');
+    return view('welcome');
 });
 
 // (Email verification routes removed by revert)
@@ -24,7 +26,8 @@ Route::get('/home', function () {
 });
 Route::get('/catalog', function () {
     $products = Product::where('is_available', true)->get();
-    return view('catalog', ['products' => $products]);
+    $categories = Category::orderBy('name')->get();
+    return view('catalog', ['products' => $products, 'categories' => $categories]);
 });
 Route::get('/product/{id}', function ($id) {
     $product = Product::findOrFail($id);
@@ -163,7 +166,7 @@ Route::get('/logout', function (Request $request) {
     // Clear the remember me cookie
     $cookie = cookie('remember_me', '', -1);
     
-    return redirect('/login')->withCookie($cookie);
+    return redirect('/')->withCookie($cookie);
 });
 
 // Password recovery routes removed
@@ -251,7 +254,22 @@ Route::post('/profile/delete', function (Request $request) {
 
 // Contact
 Route::view('/contact', 'contact');
-Route::post('/contact', function () {
+Route::post('/contact', function (Request $request) {
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'subject' => 'nullable|string|max:255',
+        'message' => 'required|string',
+    ]);
+
+    \App\Models\Message::create([
+        'user_id' => $request->session()->get('auth.user_id'),
+        'name' => $request->input('name'),
+        'email' => $request->input('email'),
+        'subject' => $request->input('subject'),
+        'content' => $request->input('message'),
+    ]);
+
     return redirect('/success');
 });
 
@@ -261,7 +279,16 @@ Route::prefix('admin')->group(function () {
         if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
         $userCount = User::count();
         $productCount = Product::count();
-        return view('admin.dashboard', ['userCount' => $userCount, 'productCount' => $productCount]);
+        $orderCount = \App\Models\Order::count();
+        $revenue = \App\Models\Order::whereIn('status', ['processing','shipped','delivered'])->sum('total_amount');
+        $messageCount = \App\Models\Message::count();
+        return view('admin.dashboard', [
+            'userCount' => $userCount,
+            'productCount' => $productCount,
+            'orderCount' => $orderCount,
+            'revenue' => $revenue,
+            'messageCount' => $messageCount,
+        ]);
     });
     
     // Products
@@ -269,6 +296,159 @@ Route::prefix('admin')->group(function () {
         if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
         $products = Product::orderBy('created_at', 'desc')->get();
         return view('admin.products', ['products' => $products]);
+    });
+
+    // Categories
+    Route::get('/categories', function (Request $request) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        return view('admin.categories');
+    });
+
+    Route::post('/categories', function (Request $request) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+        ]);
+        
+        Category::create([
+            'name' => $request->input('name'),
+            'slug' => strtolower(str_replace(' ', '-', $request->input('name'))),
+        ]);
+        
+        return back()->with('status', 'Category added successfully!');
+    });
+
+    Route::delete('/categories/{id}', function (Request $request, $id) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        
+        $category = Category::findOrFail($id);
+        $category->delete();
+        
+        return back()->with('status', 'Category deleted successfully!');
+    });
+
+    // Bulk import products from public/images/products
+    Route::get('/import-products', function (Request $request) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+
+        $basePath = public_path('images/products');
+        if (!File::exists($basePath)) {
+            return back()->with('status', 'No products directory found at /public/images/products');
+        }
+
+        $imported = 0;
+        $updated = 0;
+
+        $imageExtensions = ['jpg','jpeg','png','gif','webp'];
+
+        // Helper to process a single image file
+        $processImage = function ($relativeDir, $filename) use (&$imported, &$updated, $imageExtensions) {
+            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if (!in_array($ext, $imageExtensions)) return;
+
+            $categoryName = trim($relativeDir, DIRECTORY_SEPARATOR);
+            $categoryName = $categoryName === '' ? null : str_replace(['-', '_'], ' ', $categoryName);
+
+            $categoryId = null;
+            if ($categoryName) {
+                $category = Category::firstOrCreate(
+                    ['name' => $categoryName],
+                    ['slug' => Str::slug($categoryName)]
+                );
+                $categoryId = $category->id;
+            }
+
+            $basename = pathinfo($filename, PATHINFO_FILENAME);
+            $productName = ucwords(str_replace(['-', '_'], ' ', $basename));
+            $imageUrl = '/images/products' . ($relativeDir ? '/' . trim(str_replace('\\', '/', $relativeDir), '/') : '') . '/' . $filename;
+
+            $existing = Product::where('image', $imageUrl)->first();
+
+            if ($existing) {
+                $existing->update([
+                    'name' => $existing->name ?: $productName,
+                    'category_id' => $categoryId,
+                ]);
+                $updated++;
+            } else {
+                Product::create([
+                    'name' => $productName,
+                    'price' => 0,
+                    'description' => 'Imported product',
+                    'quantity' => 0,
+                    'is_available' => true,
+                    'image' => $imageUrl,
+                    'category_id' => $categoryId,
+                ]);
+                $imported++;
+            }
+        };
+
+        // Walk through subdirectories
+        $dirs = File::directories($basePath);
+        // Also include base directory as a category-less import
+        $dirs = array_merge([$basePath], $dirs);
+
+        foreach ($dirs as $dir) {
+            $relativeDir = trim(str_replace($basePath, '', $dir), DIRECTORY_SEPARATOR);
+            foreach (File::files($dir) as $file) {
+                $processImage($relativeDir, $file->getFilename());
+            }
+        }
+
+        return back()->with('status', "Imported: {$imported}, Updated: {$updated}");
+    });
+
+    // Messages
+    Route::get('/messages', function (Request $request) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        $messages = \App\Models\Message::orderBy('created_at','desc')->get();
+        return view('admin.messages', ['messages' => $messages]);
+    });
+    Route::get('/messages/{id}', function (Request $request, $id) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        $message = \App\Models\Message::findOrFail($id);
+        return view('admin.message_show', ['message' => $message]);
+    });
+
+    // Import category images from public/images/products/<CategoryName> (first image in each folder)
+    Route::get('/import-category-images', function (Request $request) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+
+        $basePath = public_path('images/products');
+        if (!File::exists($basePath)) {
+            return back()->with('status', 'No products directory found at /public/images/products');
+        }
+
+        $imageExtensions = ['jpg','jpeg','png','gif','webp'];
+        $updated = 0;
+
+        foreach (File::directories($basePath) as $dir) {
+            $relative = trim(str_replace($basePath, '', $dir), DIRECTORY_SEPARATOR);
+            if ($relative === '') continue;
+            $categoryName = str_replace(['-', '_'], ' ', $relative);
+            $category = Category::firstOrCreate(
+                ['name' => $categoryName],
+                ['slug' => Str::slug($categoryName)]
+            );
+
+            $files = collect(File::files($dir))
+                ->filter(fn($f) => in_array(strtolower($f->getExtension()), $imageExtensions))
+                ->values();
+
+            if ($files->count() > 0) {
+                $file = $files->first();
+                $imageUrl = '/images/products/' . $relative . '/' . $file->getFilename();
+                if ($category->image !== $imageUrl) {
+                    $category->image = $imageUrl;
+                    $category->save();
+                    $updated++;
+                }
+            }
+        }
+
+        return back()->with('status', "Category images updated: {$updated}");
     });
     
     Route::get('/products/create', function (Request $request) {
@@ -286,6 +466,7 @@ Route::prefix('admin')->group(function () {
             'quantity' => 'required|integer|min:0',
             'is_available' => 'required|boolean',
             'image' => 'nullable|url',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
         
         Product::create($request->all());
@@ -309,6 +490,7 @@ Route::prefix('admin')->group(function () {
             'quantity' => 'required|integer|min:0',
             'is_available' => 'required|boolean',
             'image' => 'nullable|url',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
         
         $product = Product::findOrFail($id);
@@ -332,6 +514,42 @@ Route::prefix('admin')->group(function () {
         $users = User::orderBy('created_at', 'desc')->get();
         return view('admin.users', ['users' => $users]);
     });
+
+    Route::post('/users/{id}/role', function (Request $request, $id) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        $request->validate(['role' => 'required|in:user,admin']);
+        $actingUserId = (int) $request->session()->get('auth.user_id');
+        $user = User::findOrFail($id);
+        if ((int)$user->id === $actingUserId) {
+            return back()->withErrors(['role' => 'Edit your own information from My Profile.']);
+        }
+        if ($user->role === 'admin') {
+            return back()->withErrors(['role' => 'You cannot modify roles of admins.']);
+        }
+        $user->role = $request->input('role');
+        $user->save();
+        return back()->with('status', 'User role updated.');
+    });
+
+    Route::put('/users/{id}', function (Request $request, $id) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+        $actingUserId = (int) $request->session()->get('auth.user_id');
+        $user = User::findOrFail($id);
+        if ((int)$user->id === $actingUserId) {
+            return back()->withErrors(['name' => 'Edit your own information from My Profile.']);
+        }
+        if ($user->role === 'admin') {
+            return back()->withErrors(['name' => 'You cannot modify details of admins.']);
+        }
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->save();
+        return back()->with('status', 'User updated.');
+    });
     
     Route::delete('/users/{id}', function (Request $request, $id) {
         if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
@@ -345,7 +563,16 @@ Route::prefix('admin')->group(function () {
     // Orders
     Route::get('/orders', function (Request $request) {
         if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
-        return view('admin.orders');
+        $orders = \App\Models\Order::with('user')->orderBy('created_at','desc')->get();
+        return view('admin.orders', ['orders' => $orders]);
+    });
+    Route::post('/orders/{id}/status', function (Request $request, $id) {
+        if ($request->session()->get('auth.role') !== 'admin') return redirect('/login');
+        $request->validate(['status' => 'required|in:pending,processing,shipped,delivered,cancelled']);
+        $order = \App\Models\Order::findOrFail($id);
+        $order->status = $request->input('status');
+        $order->save();
+        return back()->with('status', 'Order status updated');
     });
 });
 
