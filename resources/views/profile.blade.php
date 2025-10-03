@@ -92,38 +92,18 @@
                         <!-- Email Change -->
                         <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Change Email Address</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Update your email address. A verification code will be sent to confirm the change.</p>
-                            <form id="email-change-form" action="{{ url('/profile/change-email/initiate') }}" method="POST" class="space-y-4">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Update your email address.</p>
+                            <form id="email-change-form" action="{{ url('/profile/update') }}" method="POST" class="space-y-4">
                                 @csrf
                                 <div>
                                     <label for="new_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Email Address</label>
-                                    <input type="email" id="new_email" name="new_email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Enter new email address" required>
+                                    <input type="email" id="new_email" name="email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Enter new email address" required>
                                 </div>
                                 <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200">
-                                    Send Verification Code
+                                    Update Email
                                 </button>
                             </form>
                             
-                            <!-- Verification Code Section (Hidden by default) -->
-                            <div id="verification-section" class="mt-4 hidden">
-                                <form id="verify-email-form" action="{{ url('/profile/change-email/verify') }}" method="POST" class="space-y-4">
-                                    @csrf
-                                    <input type="hidden" id="hidden_new_email" name="new_email">
-                                    <div>
-                                        <label for="verification_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verification Code</label>
-                                        <input type="text" id="verification_code" name="verification_code" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white text-center text-lg tracking-widest" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
-                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter the 6-digit code sent to your new email</p>
-                                    </div>
-                                    <div class="flex space-x-3">
-                                        <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200">
-                                            Verify & Update Email
-                                        </button>
-                                        <button type="button" id="resend-code-btn" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200" disabled>
-                                            Resend Code (<span id="resend-timer">60</span>s)
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
                         </div>
 
                         <!-- Notification Preferences -->
@@ -234,76 +214,6 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
 });
 
 // Email change functionality
-document.getElementById('email-change-form').addEventListener('submit', function(e) {
-    const newEmail = document.getElementById('new_email').value;
-    
-    // Store the email for verification
-    document.getElementById('hidden_new_email').value = newEmail;
-    
-    // Show verification section after successful submission
-    // The form will submit normally and show verification section on success
-});
-
-// Show verification section if there's a success message about verification code
-document.addEventListener('DOMContentLoaded', function() {
-    const successMessage = document.querySelector('.bg-green-100');
-    if (successMessage && successMessage.textContent.includes('verification code')) {
-        document.getElementById('verification-section').classList.remove('hidden');
-        startResendTimer();
-    }
-});
-
-// Verification code form
-document.getElementById('verify-email-form').addEventListener('submit', function(e) {
-    // Let the form submit normally to the server
-    // The server will handle verification and redirect back
-});
-
-// Resend timer functionality
-let resendTimer = null;
-let timeLeft = 60;
-
-function startResendTimer() {
-    const resendBtn = document.getElementById('resend-code-btn');
-    const timerSpan = document.getElementById('resend-timer');
-    
-    resendBtn.disabled = true;
-    timeLeft = 60;
-    
-    resendTimer = setInterval(() => {
-        timeLeft--;
-        timerSpan.textContent = timeLeft;
-        
-        if (timeLeft <= 0) {
-            clearInterval(resendTimer);
-            resendBtn.disabled = false;
-            timerSpan.textContent = '60';
-        }
-    }, 1000);
-}
-
-// Auto-submit when 6 digits are entered
-document.getElementById('verification_code').addEventListener('input', function(e) {
-    // Only allow numbers
-    e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    
-    // Auto-submit when 6 digits are entered
-    if (e.target.value.length === 6) {
-        document.getElementById('verify-email-form').submit();
-    }
-});
-
-// Handle paste events for verification codes
-document.getElementById('verification_code').addEventListener('paste', function(e) {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text');
-    const numbersOnly = pastedData.replace(/[^0-9]/g, '');
-    if (numbersOnly.length <= 6) {
-        e.target.value = numbersOnly;
-        if (numbersOnly.length === 6) {
-            document.getElementById('verify-email-form').submit();
-        }
-    }
-});
+// Verification code scripts removed
 </script>
 @endsection

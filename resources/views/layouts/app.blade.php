@@ -14,66 +14,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {"50":"#fef2f2","100":"#fee2e2","200":"#fecaca","300":"#fca5a5","400":"#f87171","500":"#ef4444","600":"#dc2626","700":"#b91c1c","800":"#991b1b","900":"#7f1d1d","950":"#450a0a"}
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.6s ease-out',
-                        'fade-in': 'fadeIn 0.6s ease-out',
-                        'slide-in-left': 'slideInLeft 0.6s ease-out',
-                        'slide-in-right': 'slideInRight 0.6s ease-out',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateY(30px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateY(0)'
-                            }
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        },
-                        slideInLeft: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateX(-30px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateX(0)'
-                            }
-                        },
-                        slideInRight: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateX(30px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateX(0)'
-                            }
-                        }
-                    }
-                },
-                fontFamily: {
-                    'body': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
-                    'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji']
-                }
-            }
-        }
-    </script>
+    
     
     <style>
         .animate-fade-in-up {
@@ -119,7 +60,7 @@
 
                     <div class="flex items-center space-x-8">
                         <div class="shrink-0">
-                            <a href="{{ url('/home') }}" title="" class="">
+                            <a href="{{ url('/home') }}" title="" class="flex items-center space-x-2">
                                 <svg class="block w-auto h-8 dark:hidden" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                                     <defs>
                                         <linearGradient id="bagSplit" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -140,6 +81,7 @@
                                     <path d="M96 144h320c10.7 0 19.7 7.8 21.1 18.4l40 312C478.8 486 462.9 504 442.9 504H69.1c-20 0-35.9-18-34.2-29.6l40-312C76.3 151.8 85.3 144 96 144z" fill="url(#bagSplitDark)"/>
                                     <path d="M176 208a16 16 0 0 1-16-16v-64c0-58.5 47.5-106 106-106s106 47.5 106 106v64a16 16 0 1 1-32 0v-64c0-40.9-33.1-74-74-74s-74 33.1-74 74v64a16 16 0 0 1-16 16z" fill="#ffffff"/>
                                 </svg>
+                                <span class="text-xl font-bold text-gray-900 dark:text-white">Style Haven</span>
                             </a>
                         </div>
 
@@ -310,6 +252,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
     
     <script>
+        // Global: toggle password visibility buttons
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-toggle-password]');
+            if (!btn) return;
+            const sel = btn.getAttribute('data-toggle-password');
+            const input = document.querySelector(sel);
+            if (!input) return;
+            
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
+            
+            if (input.getAttribute('type') === 'password') {
+                // Password is currently hidden, show it (open eye)
+                input.setAttribute('type', 'text');
+                eyeOpen.classList.remove('hidden'); // Show open eye
+                eyeClosed.classList.add('hidden');   // Hide closed eye
+            } else {
+                // Password is currently visible, hide it (closed eye)
+                input.setAttribute('type', 'password');
+                eyeOpen.classList.add('hidden');     // Hide open eye
+                eyeClosed.classList.remove('hidden'); // Show closed eye
+            }
+        });
+
+        // Global: clear all forms on page show (when navigating back/forward)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.querySelectorAll('form').forEach(function(form) { form.reset(); });
+            }
+        });
+
         // Mobile menu toggle
         const mobileMenuButton = document.querySelector('[data-collapse-toggle="ecommerce-navbar-menu-1"]');
         const mobileMenu = document.getElementById('ecommerce-navbar-menu-1');

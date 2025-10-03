@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Product;
 
 Route::get('/', function () {
     return redirect('/login');
 });
+
+// (Email verification routes removed by revert)
 
 // Customer pages
 Route::get('/home', function () {
@@ -37,11 +40,17 @@ Route::view('/about', 'about');
 Route::view('/faq', 'faq');
 
 // Auth pages
-Route::get('/register', function () {
+Route::get('/register', function (Request $request) {
+    if ($request->session()->get('auth.user_id')) {
+        return redirect('/home');
+    }
     return view('auth.register');
 });
 
 Route::post('/register', function (Request $request) {
+    if ($request->session()->get('auth.user_id')) {
+        return redirect('/home');
+    }
     // Trim all inputs to remove trailing spaces
     $request->merge([
         'name' => trim($request->input('name')),
@@ -76,12 +85,24 @@ Route::post('/register', function (Request $request) {
         'role' => 'user',
     ]);
 
-    return redirect('/login')->with('status', 'Account created successfully! Please log in.');
+    // Log the user in immediately after registration
+    $request->session()->put('auth.user_id', $user->id);
+    $request->session()->put('auth.email', $user->email);
+    $request->session()->put('auth.name', $user->name);
+    $request->session()->put('auth.role', $user->role);
+
+    return redirect('/home');
 });
-Route::get('/login', function () {
+Route::get('/login', function (Request $request) {
+    if ($request->session()->get('auth.user_id')) {
+        return redirect('/home');
+    }
     return view('auth.login');
 });
 Route::post('/login', function (Request $request) {
+    if ($request->session()->get('auth.user_id')) {
+        return redirect('/home');
+    }
     // Trim all inputs to remove trailing spaces
     $request->merge([
         'email' => trim($request->input('email')),
@@ -111,216 +132,43 @@ Route::post('/login', function (Request $request) {
     $request->session()->put('auth.email', $user->email);
     $request->session()->put('auth.name', $user->name);
     $request->session()->put('auth.role', $user->role);
-    
+
     // Handle Remember Me functionality
     if ($remember) {
-        $request->session()->put('auth.remember', true);
+        $rememberToken = $user->generateRememberToken();
+        
+        // Set a remember me cookie that expires in 30 days
+        $cookie = cookie('remember_me', $rememberToken, 60 * 24 * 30); // 30 days
+        
         // Set session lifetime to 30 days for remember me
-        $request->session()->put('auth.remember_token', Str::random(60));
+        $request->session()->put('auth.remember', true);
+        
+        return redirect($user->role === 'admin' ? '/admin' : '/home')->withCookie($cookie);
     }
-    
+
     return redirect($user->role === 'admin' ? '/admin' : '/home');
 });
 Route::get('/logout', function (Request $request) {
+    // Clear remember me token if user is logged in
+    if ($request->session()->has('auth.user_id')) {
+        $userId = $request->session()->get('auth.user_id');
+        $user = User::find($userId);
+        if ($user) {
+            $user->clearRememberToken();
+        }
+    }
+    
     $request->session()->invalidate();
-    return redirect('/login');
+    
+    // Clear the remember me cookie
+    $cookie = cookie('remember_me', '', -1);
+    
+    return redirect('/login')->withCookie($cookie);
 });
 
-// Password Recovery Flow
-Route::get('/recover/initiate', function () {
-    return view('auth.recover.initiate');
-});
+// Password recovery routes removed
 
-Route::post('/recover/initiate', function (Request $request) {
-    // Trim all inputs to remove trailing spaces
-    $request->merge([
-        'email' => trim($request->input('email')),
-    ]);
-
-    $email = $request->input('email');
-    if ($email === '') {
-        return back()->withErrors(['email' => 'Please enter your email address'])->withInput();
-    }
-
-    $user = User::where('email', $email)->first();
-    if (!$user) {
-        return back()->withErrors(['email' => "We're sorry. We weren't able to identify you given the information provided."])->withInput();
-    }
-
-    $ipAddress = $request->ip();
-    
-    // Check rate limiting
-    if (\App\Models\VerificationCode::isRateLimited($email, $ipAddress)) {
-        return back()->withErrors(['email' => 'Too many password reset requests. Please wait before trying again.'])->withInput();
-    }
-
-    // Clean up old codes
-    \App\Models\VerificationCode::cleanup();
-
-    // Get an available verification code
-    $verificationCode = \App\Models\VerificationCode::getAvailableCode($email, $ipAddress);
-    
-    try {
-        Mail::to($email)->send(new \App\Mail\VerificationCodeMail($verificationCode->code, $email));
-        
-        // In development mode, also log the code for easy testing
-        if (config('app.debug')) {
-            \Log::info("Verification code for {$email}: {$verificationCode->code}");
-        }
-    } catch (\Throwable $e) {
-        // Log the error but don't show it to user
-        \Log::error('Failed to send verification email: ' . $e->getMessage());
-        return back()->withErrors(['email' => 'Failed to send verification email. Please try again.'])->withInput();
-    }
-
-    return redirect('/recover/code')->with('email', $email);
-});
-
-Route::get('/recover/code', function (Request $request) {
-    $email = $request->session()->get('recover.email') ?? 
-             $request->session()->get('email') ?? 
-             $request->get('email');
-    if (!$email) {
-        return redirect('/recover/initiate');
-    }
-    // Store email in session for page refreshes
-    $request->session()->put('recover.email', $email);
-    return view('auth.recover.code', ['email' => $email]);
-});
-
-Route::post('/recover/code', function (Request $request) {
-    $email = $request->input('email');
-    $code = $request->input('code');
-    
-    if (!$email || !$code) {
-        return back()->withErrors(['code' => "Please enter a valid verification code."])->withInput();
-    }
-
-    $ipAddress = $request->ip();
-    
-    // Verify the code using the enhanced system
-    $verificationResult = \App\Models\VerificationCode::verifyCode($email, $code, $ipAddress);
-    
-    if (!$verificationResult['success']) {
-        return back()->withErrors(['code' => $verificationResult['message']])->withInput();
-    }
-
-    // Code is valid, mark verification as complete and proceed to reset
-    $request->session()->put('recover.verified', true);
-    $request->session()->put('recover.verified_email', $email);
-    return redirect('/recover/reset')->with('email', $email);
-});
-
-Route::get('/recover/reset', function (Request $request) {
-    // Check if user has completed code verification
-    if (!$request->session()->get('recover.verified')) {
-        return redirect('/recover/initiate');
-    }
-    
-    $email = $request->session()->get('recover.verified_email') ?? 
-             $request->session()->get('email') ?? 
-             $request->get('email');
-    
-    if (!$email) {
-        return redirect('/recover/initiate');
-    }
-    
-    // Store email in session for page refreshes
-    $request->session()->put('recover.reset_email', $email);
-    return view('auth.recover.reset', ['email' => $email]);
-});
-
-Route::post('/recover/reset', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|min:8|confirmed',
-    ]);
-
-    $email = $request->input('email');
-    $user = User::where('email', $email)->first();
-    
-    if (!$user) {
-        return back()->withErrors(['email' => "We're sorry. We weren't able to identify you given the information provided."])->withInput();
-    }
-
-    $user->password = Hash::make((string) $request->input('password'));
-    $user->save();
-
-    // Clear any recovery codes for this email
-    \App\Models\VerificationCode::where('email', $email)->delete();
-
-    // Clear recovery session data
-    $request->session()->forget(['recover.verified', 'recover.verified_email', 'recover.email', 'recover.reset_email']);
-
-    return redirect('/login')->with('status', 'Your password has been reset successfully. Please sign in with your new credentials.');
-});
-
-Route::post('/recover/resend', function (Request $request) {
-    $email = $request->input('email') ?? $request->session()->get('recover.email');
-    if (!$email) {
-        return redirect('/recover/initiate');
-    }
-
-    $user = User::where('email', $email)->first();
-    if (!$user) {
-        return back()->withErrors(['code' => "We're sorry. We weren't able to identify you given the information provided."])->withInput();
-    }
-
-    $ipAddress = $request->ip();
-    
-    // Check rate limiting
-    if (\App\Models\VerificationCode::isRateLimited($email, $ipAddress)) {
-        return back()->withErrors(['code' => 'Too many password reset requests. Please wait before trying again.'])->withInput();
-    }
-
-    // Check if there's already a valid code (prevent spam)
-    if (\App\Models\VerificationCode::hasValidCode($email)) {
-        $currentCode = \App\Models\VerificationCode::getCurrentCode($email);
-        $timeLeft = $currentCode->expires_at->diffInSeconds(now());
-        if ($timeLeft > 300) { // 5 minutes
-            return back()->withErrors(['code' => "Please wait before requesting a new code. Your current code is still valid."])->withInput();
-        }
-    }
-
-    // Get a new verification code
-    $verificationCode = \App\Models\VerificationCode::getAvailableCode($email, $ipAddress);
-    
-    try {
-        Mail::to($email)->send(new \App\Mail\VerificationCodeMail($verificationCode->code, $email));
-        
-        // In development mode, also log the code for easy testing
-        if (config('app.debug')) {
-            \Log::info("Resend verification code for {$email}: {$verificationCode->code}");
-        }
-    } catch (\Throwable $e) {
-        // Log the error but don't show it to user
-        \Log::error('Failed to send verification email: ' . $e->getMessage());
-        return back()->withErrors(['code' => 'Failed to send verification email. Please try again.'])->withInput();
-    }
-
-    return back()->with('status', 'A new verification code has been sent to your email.');
-});
-
-// Debug route to check verification codes (only in debug mode)
-if (config('app.debug')) {
-    Route::get('/debug/verification-code/{email}', function ($email) {
-        $code = \App\Models\VerificationCode::where('email', $email)
-                                           ->where('used', false)
-                                           ->where('expires_at', '>', now())
-                                           ->first();
-        
-        if ($code) {
-            return response()->json([
-                'email' => $email,
-                'code' => $code->code,
-                'expires_at' => $code->expires_at->format('Y-m-d H:i:s'),
-                'time_left' => $code->expires_at->diffInSeconds(now()) . ' seconds'
-            ]);
-        }
-        
-        return response()->json(['error' => 'No valid verification code found for this email']);
-    });
-}
+// Debug verification route removed
 
 // Profile Management
 Route::get('/profile', function (Request $request) {
@@ -501,90 +349,7 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-// Email change verification routes
-Route::post('/profile/change-email/initiate', function (Request $request) {
-    if (!$request->session()->get('auth.user_id')) {
-        return redirect('/login');
-    }
-
-    // Trim all inputs to remove trailing spaces
-    $request->merge([
-        'new_email' => trim($request->input('new_email')),
-    ]);
-
-    $request->validate([
-        'new_email' => 'required|email|max:255|different:current_email',
-    ], [
-        'new_email.required' => 'New email is required',
-        'new_email.email' => 'Please enter a valid email address',
-        'new_email.different' => 'New email must be different from current email',
-    ]);
-
-    $newEmail = $request->input('new_email');
-    $currentEmail = $request->session()->get('auth.email');
-    $ipAddress = $request->ip();
-
-    // Check if email already exists
-    $existingUser = \App\Models\User::where('email', $newEmail)->first();
-    if ($existingUser) {
-        return back()->withErrors(['new_email' => 'This email is already registered with another account.'])->withInput();
-    }
-
-    // Check rate limiting
-    if (\App\Models\VerificationCode::isRateLimited($newEmail, $ipAddress)) {
-        return back()->withErrors(['new_email' => 'Too many email change requests. Please wait before trying again.'])->withInput();
-    }
-
-    // Clean up old codes
-    \App\Models\VerificationCode::cleanup();
-
-    // Get an available verification code
-    $verificationCode = \App\Models\VerificationCode::getAvailableCode($newEmail, $ipAddress);
-    
-    try {
-        Mail::to($newEmail)->send(new \App\Mail\VerificationCodeMail($verificationCode->code, $newEmail));
-        return back()->with('success', 'Verification code sent to your new email address.');
-    } catch (\Throwable $e) {
-        \Log::error('Failed to send email change verification: ' . $e->getMessage());
-        return back()->withErrors(['new_email' => 'Failed to send verification email. Please try again.'])->withInput();
-    }
-});
-
-Route::post('/profile/change-email/verify', function (Request $request) {
-    if (!$request->session()->get('auth.user_id')) {
-        return redirect('/login');
-    }
-
-    $request->validate([
-        'new_email' => 'required|email|max:255',
-        'verification_code' => 'required|string|size:6',
-    ]);
-
-    $newEmail = $request->input('new_email');
-    $code = $request->input('verification_code');
-    $ipAddress = $request->ip();
-
-    // Verify the code using the enhanced system
-    $verificationResult = \App\Models\VerificationCode::verifyCode($newEmail, $code, $ipAddress);
-    
-    if (!$verificationResult['success']) {
-        return back()->withErrors(['verification_code' => $verificationResult['message']])->withInput();
-    }
-
-    // Update user email
-    $userId = $request->session()->get('auth.user_id');
-    $user = \App\Models\User::find($userId);
-    if ($user) {
-        $user->update(['email' => $newEmail]);
-        
-        // Update session
-        $request->session()->put('auth.email', $newEmail);
-        
-        return back()->with('success', 'Email address updated successfully!');
-    }
-
-    return back()->withErrors(['verification_code' => 'Failed to update email address. Please try again.'])->withInput();
-});
+// Email change verification routes removed
 
 // Cart routes
 Route::post('/cart/add', function (Request $request) {

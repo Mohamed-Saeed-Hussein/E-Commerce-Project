@@ -1,27 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Style Haven - Auth')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/style.css">
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>@yield('title', 'Style Haven') - {{ config('app.name', 'Style Haven') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
+    
+    <style>
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .animate-slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        /* Scroll-triggered animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .scroll-animate.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center">
-    <main class="w-full px-4">
-        @yield('content')
-    </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/script.js"></script>
+<body class="font-sans antialiased dark:bg-gray-900">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <main class="w-full">
+            @yield('content')
+        </main>
+    </div>
+
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    
+    <script>
+        // Auth pages: toggle password visibility
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-toggle-password]');
+            if (!btn) return;
+            const sel = btn.getAttribute('data-toggle-password');
+            const input = document.querySelector(sel);
+            if (!input) return;
+            
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
+            
+            if (input.getAttribute('type') === 'password') {
+                // Password is currently hidden, show it (open eye)
+                input.setAttribute('type', 'text');
+                eyeOpen.classList.remove('hidden'); // Show open eye
+                eyeClosed.classList.add('hidden');   // Hide closed eye
+            } else {
+                // Password is currently visible, hide it (closed eye)
+                input.setAttribute('type', 'password');
+                eyeOpen.classList.add('hidden');     // Hide open eye
+                eyeClosed.classList.remove('hidden'); // Show closed eye
+            }
+        });
+
+        // Clear forms when navigating back to the page
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.querySelectorAll('form').forEach(function(form) { form.reset(); });
+            }
+        });
+
+        // Scroll-triggered animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.scroll-animate');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate');
+                }
+            });
+        }
+
+        // Run on scroll and on load
+        window.addEventListener('scroll', handleScrollAnimations);
+        window.addEventListener('load', handleScrollAnimations);
+    </script>
 </body>
 
 </html>
