@@ -72,16 +72,14 @@
                 <div class="space-y-4">
                     <div>
                         <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
-                        <div class="mt-1 flex items-center space-x-2">
-                            <button type="button" onclick="decreaseQuantity()" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                                -
-                            </button>
-                            <input type="number" id="quantity" value="1" min="1" max="{{ $product->quantity }}" class="w-20 text-center border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <button type="button" onclick="increaseQuantity()" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                                +
-                            </button>
+                        <div class="mt-1">
+                            <div class="quantity-selector flex items-center border border-gray-300 dark:border-gray-600 rounded-md group-hover:border-primary-300 dark:group-hover:border-primary-600 transition-colors duration-300">
+                                <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="decreaseQuantity()">-</button>
+                                <input type="number" id="quantity" value="1" min="1" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white">
+                                <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="increaseQuantity()">+</button>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $product->quantity }} available</p>
                         </div>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $product->quantity }} available</p>
                     </div>
 
                     <button onclick="addToCart()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200">

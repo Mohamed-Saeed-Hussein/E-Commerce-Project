@@ -12,7 +12,15 @@ class Order extends Model
         'total_amount',
         'status',
         'shipping_address',
-        'billing_address'
+        'billing_address',
+        'phone',
+        'postal_code',
+        'city',
+        'country',
+        'billing_phone',
+        'billing_postal_code',
+        'billing_city',
+        'billing_country'
     ];
 
     protected $casts = [
@@ -29,7 +37,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public static function createFromCart($userId, $shippingAddress, $billingAddress)
+    public static function createFromCart($userId, $shippingAddress, $billingAddress, $shippingDetails = null, $billingDetails = null)
     {
         $cartItems = Cart::getCartItems($userId);
         
@@ -41,14 +49,32 @@ class Order extends Model
             return $item->quantity * $item->price;
         });
 
-        $order = self::create([
+        $orderData = [
             'user_id' => $userId,
             'order_number' => 'ORD-' . time() . '-' . rand(1000, 9999),
             'total_amount' => $totalAmount,
             'status' => 'pending',
             'shipping_address' => $shippingAddress,
             'billing_address' => $billingAddress
-        ]);
+        ];
+
+        // Add detailed shipping information if provided
+        if ($shippingDetails) {
+            $orderData['phone'] = $shippingDetails['phone'] ?? null;
+            $orderData['postal_code'] = $shippingDetails['postal_code'] ?? null;
+            $orderData['city'] = $shippingDetails['city'] ?? null;
+            $orderData['country'] = $shippingDetails['country'] ?? null;
+        }
+
+        // Add detailed billing information if provided
+        if ($billingDetails) {
+            $orderData['billing_phone'] = $billingDetails['phone'] ?? null;
+            $orderData['billing_postal_code'] = $billingDetails['postal_code'] ?? null;
+            $orderData['billing_city'] = $billingDetails['city'] ?? null;
+            $orderData['billing_country'] = $billingDetails['country'] ?? null;
+        }
+
+        $order = self::create($orderData);
 
         foreach ($cartItems as $cartItem) {
             OrderItem::create([

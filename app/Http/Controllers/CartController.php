@@ -104,6 +104,17 @@ class CartController extends Controller
         $productId = $request->input('product_id');
         $quantity = $request->input('quantity');
 
+        // Get product details to check stock
+        $product = Product::find($productId);
+        if (!$product || !$product->is_available) {
+            return response()->json(['success' => false, 'message' => 'Product not available']);
+        }
+
+        // Check if quantity exceeds available stock
+        if ($quantity > $product->quantity) {
+            return response()->json(['success' => false, 'message' => 'Not enough stock available. Only ' . $product->quantity . ' items in stock.']);
+        }
+
         $cartItem = Cart::where('user_id', $userId)
                        ->where('product_id', $productId)
                        ->first();

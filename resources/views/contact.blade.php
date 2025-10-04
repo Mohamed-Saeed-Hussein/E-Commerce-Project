@@ -20,6 +20,18 @@
                         <form action="{{ url('/contact') }}" method="POST" class="space-y-4 md:space-y-6" autocomplete="off">
                             @csrf
                             <div>
+                                <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    Name <span class="text-xs text-gray-500 dark:text-gray-400">(from your account)</span>
+                                </label>
+                                <input type="text" id="name" name="name" value="{{ session('auth.name', '') }}" class="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-600 dark:text-gray-300 cursor-not-allowed" placeholder="Your name" readonly />
+                            </div>
+                            <div>
+                                <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    Email <span class="text-xs text-gray-500 dark:text-gray-400">(from your account)</span>
+                                </label>
+                                <input type="email" id="email" name="email" value="{{ session('auth.email', '') }}" class="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-600 dark:text-gray-300 cursor-not-allowed" placeholder="your@email.com" readonly />
+                            </div>
+                            <div>
                                 <label for="subject" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Subject</label>
                                 <input type="text" id="subject" name="subject" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="How can we help?" required />
                             </div>

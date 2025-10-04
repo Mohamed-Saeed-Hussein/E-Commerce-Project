@@ -122,6 +122,7 @@
                     <div class="flex items-center lg:space-x-2">
 
                         @if(session('auth.user_id'))
+                        <div class="relative">
                         <button id="userDropdownButton1" data-dropdown-toggle="userDropdown1" type="button" class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white transition-all duration-200 hover:scale-105 hover:shadow-md">
                             <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" stroke-width="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/>
@@ -141,10 +142,10 @@
                                 <li><a href="{{ url('/profile') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> My Profile </a></li>
                                 <li><a href="{{ url('/admin') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> Admin Dashboard </a></li>
                             </ul>
-                    
                             <div class="p-2 text-sm font-medium text-gray-900 dark:text-white">
                                 <a href="{{ url('/logout') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"> Sign Out </a>
                             </div>
+                        </div>
                         </div>
                         @else
                         <a href="{{ url('/login') }}" class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white transition-all duration-200 hover:scale-105 hover:shadow-md">
@@ -245,6 +246,29 @@
 
     <!-- Flowbite JS for dropdowns and components -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <style>
+        /* Fix dropdown positioning and disable animations */
+        #userDropdown1 {
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+            margin-top: 0.5rem !important;
+        }
+        #userDropdown1.hidden {
+            display: none !important;
+        }
+        #userDropdown1:not(.hidden) {
+            display: block !important;
+        }
+        /* Ensure the button container has relative positioning */
+        #userDropdownButton1 {
+            position: relative !important;
+        }
+    </style>
 
     <script>
         // Global: toggle password visibility buttons

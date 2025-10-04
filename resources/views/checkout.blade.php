@@ -1,207 +1,280 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Style Haven - Checkout</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="{{ url('/home') }}">Style Haven</a>
+@extends('layouts.app')
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+@section('title', 'Checkout')
 
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <div class="mx-auto">
-          <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="{{ url('/home') }}">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url('/catalog') }}">Products</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url('/about') }}">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url('/contact') }}">Contact</a></li>
-            <li class="nav-item">
-              <a href="{{ url('/cart') }}" class="nav-link cart-link" aria-label="Cart">
-                <span class="cart-icon light-visible"><i class="fas fa-shopping-cart"></i></span>
-                <span class="cart-icon dark-visible" style="display:none"><i class="fas fa-shopping-basket"></i></span>
-                <span id="cartCountBadge" class="cart-count-badge">0</span>
-              </a>
-            </li>
-          </ul>
+@section('content')
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Checkout</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">Complete your order with shipping and billing information</p>
         </div>
 
-        <div class="nav-actions">
-          <button id="darkToggle" class="btn-custom" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
-          <a id="accountLink" href="{{ url('/profile') }}" class="btn-custom" style="display:none"><i class="fas fa-user"></i> Account</a>
-          <a href="{{ url('/login') }}" class="btn-custom">Sign In</a>
-          <a href="{{ url('/register') }}" class="btn-custom">Sign Up</a>
+        @if(!session('auth.user_id'))
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+            <div class="mb-4">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
         </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Please sign in to checkout</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Create an account or sign in to proceed to payment.</p>
+            <div class="flex justify-center gap-4">
+                <a href="{{ url('/login') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200">Sign In</a>
+                <a href="{{ url('/register') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">Create Account</a>
       </div>
     </div>
-  </nav>
-
-  <section class="container py-5">
-    <div id="checkoutRoot" class="row g-4">
-      <!-- Filled by JS -->
-    </div>
-  </section>
-
-  <footer class="bg-dark text-white pt-5 pb-3 mt-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4">
-          <h5>Style Haven</h5>
-          <p>Your trusted store for trendy fashion</p>
+        @elseif($cartItems->count() == 0)
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+            <div class="mb-4">
+            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
+            </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your cart is empty</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Add items to your cart before checking out.</p>
+            <a href="{{ url('/catalog') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">Start Shopping</a>
         </div>
-        <div class="col-md-4">
-          <h6>Quick Links</h6>
-          <ul class="list-unstyled">
-            <li><a href="{{ url('/home') }}" class="text-white">Home</a></li>
-            <li><a href="{{ url('/catalog') }}" class="text-white">Products</a></li>
-            <li><a href="{{ url('/about') }}" class="text-white">About</a></li>
-            <li><a href="{{ url('/contact') }}" class="text-white">Contact</a></li>
-          </ul>
+        @else
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Shipping Information -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Shipping Information</h3>
+                    <form id="checkoutForm" class="space-y-4">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="fullName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
         </div>
-        <div class="col-md-4">
-          <h6>Follow Us</h6>
-          <div class="d-flex gap-2">
-            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-facebook"></i></a>
-            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-twitter"></i></a>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                                <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           </div>
         </div>
+                        
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                            <input type="text" id="address" name="address" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                                <input type="text" id="city" name="city" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Postal Code</label>
+                                <input type="text" id="postal_code" name="postal_code" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
       </div>
-      <div class="text-center mt-4">
-        <p class="mb-0">&copy; {{ date('Y') }} Style Haven. All rights reserved.</p>
+                            <div>
+                                <label for="country" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                                <input type="text" id="country" name="country" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
       </div>
     </div>
-  </footer>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                    </form>
+                </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/script.js"></script>
-  <script>
-    (function(){
-      function readLS(key, def){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }catch(e){ return def; } }
-      function isAuthed(){ return !!readLS('authUser', null); }
-      function getCart(){ return readLS('cartItems', []); }
-
-      document.addEventListener('DOMContentLoaded', function(){
-        const root = document.getElementById('checkoutRoot');
-        const authed = isAuthed();
-        const items = getCart();
-        if (!authed){
-          root.innerHTML = '<div class="col-12"><div class="empty-cart-container text-center"><div class="empty-cart-icon mb-3"><i class="fas fa-user-lock fa-4x text-muted"></i></div><h2>Please sign in to checkout</h2><p class="text-muted">Create an account or sign in to proceed to payment.</p><div class="d-flex justify-content-center gap-2"><a class="btn btn-outline-secondary" href="'+ ("{{ url('/login') }}") +'">Sign In</a><a class="btn btn-danger" href="'+ ("{{ url('/register') }}") +'">Create Account</a></div></div></div>';
-          return;
-        }
-        if (!items.length){
-          root.innerHTML = '<div class="col-12"><div class="empty-cart-container text-center"><div class="empty-cart-icon mb-3"><i class="fas fa-shopping-cart fa-4x text-muted"></i></div><h2>Your cart is empty</h2><p class="text-muted">Add items to your cart before checking out.</p><a class="btn btn-danger" href="'+ ("{{ url('/catalog') }}") +'">Start Shopping</a></div></div>';
-          return;
-        }
-
-        const summary = items.map(it => {
-          const line = (it.price||0) * (it.qty||0);
-          return `<tr><td>${it.name}</td><td>${it.qty}</td><td>${(it.price||0).toFixed(2)} EGP</td><td>${line.toFixed(2)} EGP</td></tr>`
-        }).join('');
-        const total = items.reduce((s,i)=> s + (i.price||0)*(i.qty||0), 0);
-
-        root.innerHTML = `
-          <div class="col-lg-7">
-            <div class="card p-3">
-              <h5 class="mb-3">Shipping Information</h5>
-              <form id="checkoutForm" novalidate>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label" for="fullName">Full Name</label>
-                    <input class="form-control" id="fullName" required>
+                <!-- Billing Information -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Billing Information</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="sameAsShipping" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            <label for="sameAsShipping" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Same as shipping address</label>
+                        </div>
+                        
+                        <div id="billingFields" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="billingName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                                    <input type="text" id="billingName" name="billingName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
+                                <div>
+                                    <label for="billingEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                                    <input type="email" id="billingEmail" name="billingEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="billingAddress" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                                <input type="text" id="billingAddress" name="billingAddress" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="billingCity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                                    <input type="text" id="billingCity" name="billingCity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
+                                <div>
+                                    <label for="billingPostalCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Postal Code</label>
+                                    <input type="text" id="billingPostalCode" name="billingPostalCode" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
+                                <div>
+                                    <label for="billingCountry" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                                    <input type="text" id="billingCountry" name="billingCountry" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="email">Email</label>
-                    <input type="email" class="form-control" id="email" required>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="address">Address</label>
-                    <input class="form-control" id="address" required>
+                            
+                            <div>
+                                <label for="billingPhone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                                <input type="tel" id="billingPhone" name="billingPhone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                   </div>
-                  <div class="col-md-3">
-                    <label class="form-label" for="city">City</label>
-                    <input class="form-control" id="city" required>
                   </div>
-                  <div class="col-md-3">
-                    <label class="form-label" for="zip">ZIP</label>
-                    <input class="form-control" id="zip" required>
                   </div>
                 </div>
-                <hr class="my-4">
-                <h5 class="mb-3">Payment</h5>
-                <div class="row g-3">
-                  <div class="col-md-8">
-                    <label class="form-label" for="cardNumber">Card Number</label>
-                    <input class="form-control" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required>
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label" for="exp">MM/YY</label>
-                    <input class="form-control" id="exp" maxlength="5" placeholder="MM/YY" required>
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label" for="cvc">CVC</label>
-                    <input class="form-control" id="cvc" maxlength="4" placeholder="123" required>
-                  </div>
+
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 sticky top-8">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Order Summary</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+                            <span class="text-gray-900 dark:text-white">${{ number_format($cartItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Shipping</span>
+                            <span class="text-gray-900 dark:text-white">Free</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Tax</span>
+                            <span class="text-gray-900 dark:text-white">$0.00</span>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <div class="flex justify-between">
+                                <span class="text-lg font-semibold text-gray-900 dark:text-white">Total</span>
+                                <span class="text-lg font-semibold text-primary-600 dark:text-primary-400">${{ number_format($cartItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <div class="mt-6">
+                        <button type="submit" form="checkoutForm" class="w-full bg-primary-600 text-white py-3 px-4 rounded-md font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 inline-flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
+                            </svg>
+                            Place Order - Cash on Delivery
+                        </button>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-end mt-4">
-                  <button class="btn btn-danger" type="submit">Pay ${total.toFixed(2)} EGP</button>
-                </div>
-              </form>
             </div>
           </div>
-          <div class="col-lg-5">
-            <div class="card p-3">
-              <h5 class="mb-3">Order Summary</h5>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
-                  <tbody>${summary}</tbody>
-                  <tfoot><tr><th colspan="3" class="text-end">Total</th><th>${total.toFixed(2)} EGP</th></tr></tfoot>
-                </table>
-              </div>
-            </div>
-          </div>
-        `;
+        @endif
+    </div>
+</div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle same as shipping checkbox
+    const sameAsShipping = document.getElementById('sameAsShipping');
+    const billingFields = document.getElementById('billingFields');
+    
+    if (sameAsShipping && billingFields) {
+        sameAsShipping.addEventListener('change', function() {
+            if (this.checked) {
+                billingFields.style.display = 'none';
+                // Copy shipping data to billing
+                document.getElementById('billingName').value = document.getElementById('fullName').value;
+                document.getElementById('billingEmail').value = document.getElementById('email').value;
+                document.getElementById('billingAddress').value = document.getElementById('address').value;
+                document.getElementById('billingCity').value = document.getElementById('city').value;
+                document.getElementById('billingPostalCode').value = document.getElementById('postal_code').value;
+                document.getElementById('billingCountry').value = document.getElementById('country').value;
+                document.getElementById('billingPhone').value = document.getElementById('phone').value;
+            } else {
+                billingFields.style.display = 'block';
+            }
+        });
+    }
+
+    // Form submission
         const form = document.getElementById('checkoutForm');
-        form.addEventListener('submit', function(ev){
+    if (form) {
+        form.addEventListener('submit', function(ev) {
           ev.preventDefault();
+            
           const fullName = document.getElementById('fullName').value.trim();
           const email = document.getElementById('email').value.trim();
           const address = document.getElementById('address').value.trim();
           const city = document.getElementById('city').value.trim();
-          const zip = document.getElementById('zip').value.trim();
-          const card = document.getElementById('cardNumber').value.replace(/\s+/g,'');
-          const exp = document.getElementById('exp').value.trim();
-          const cvc = document.getElementById('cvc').value.trim();
+            const postalCode = document.getElementById('postal_code').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            if (!fullName || !emailOk || !address || !city || !postalCode || !country || !phone) {
+                alert('Please fill out all fields correctly.');
+                return;
+            }
 
-          const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-          if (!fullName || !emailOk || !address || !city || !zip || card.length < 12 || !/^\d+$/.test(card) || !/^\d{2}\/?\d{2}$/.test(exp) || !/^\d{3,4}$/.test(cvc)){
-            alert('Please fill out all fields correctly.');
-            return;
-          }
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('fullName', fullName);
+            formData.append('email', email);
+            formData.append('address', address);
+            formData.append('city', city);
+            formData.append('postal_code', postalCode);
+            formData.append('country', country);
+            formData.append('phone', phone);
+            
+            // Add billing information
+            const sameAsShippingChecked = document.getElementById('sameAsShipping').checked;
+            if (sameAsShippingChecked) {
+                formData.append('billingName', fullName);
+                formData.append('billingEmail', email);
+                formData.append('billingAddress', address);
+                formData.append('billingCity', city);
+                formData.append('billingPostalCode', postalCode);
+                formData.append('billingCountry', country);
+                formData.append('billingPhone', phone);
+            } else {
+                formData.append('billingName', document.getElementById('billingName').value.trim());
+                formData.append('billingEmail', document.getElementById('billingEmail').value.trim());
+                formData.append('billingAddress', document.getElementById('billingAddress').value.trim());
+                formData.append('billingCity', document.getElementById('billingCity').value.trim());
+                formData.append('billingPostalCode', document.getElementById('billingPostalCode').value.trim());
+                formData.append('billingCountry', document.getElementById('billingCountry').value.trim());
+                formData.append('billingPhone', document.getElementById('billingPhone').value.trim());
+            }
 
-          // Simulated success
-          alert('Payment successful! Thank you for your order.');
-          try { localStorage.setItem('cartItems', '[]'); } catch(e){}
-          setTimeout(()=>{ location.href = '{{ url('/home') }}'; }, 800);
+            // Submit the form
+            fetch('{{ url("/checkout") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                // Redirect to orders page
+                window.location.href = '{{ url("/orders") }}';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error processing your order. Please try again.');
+            });
         });
-      });
-    })();
+    }
+});
   </script>
-</body>
-</html>
+@endsection
 
 

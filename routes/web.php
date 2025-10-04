@@ -27,7 +27,7 @@ Route::get('/product/{id}', [ProductController::class, 'show']);
 
 // Static pages
 Route::view('/cart', 'cart');
-Route::view('/checkout', 'checkout');
+Route::get('/checkout', [OrderController::class, 'showCheckout']);
 Route::view('/about', 'about');
 Route::view('/faq', 'faq');
 
