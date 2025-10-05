@@ -34,6 +34,6 @@ class ContactController extends Controller
             'content' => $request->input('message'),
         ]);
 
-        return redirect('/success');
+        return redirect('/contact')->with('success', 'Your message has been sent successfully! We will get back to you soon.');
     }
 }

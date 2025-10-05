@@ -3,6 +3,14 @@
 @section('title', 'Contact Us')
 
 @section('content')
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        PopupMessage.success('{{ session('success') }}');
+    });
+</script>
+@endif
+
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->

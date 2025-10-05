@@ -47,5 +47,8 @@ class DatabaseSeeder extends Seeder
         
         // Set admin role using the protected method
         $admin->setAdminRole();
+        
+        // Seed products with images
+        $this->call(ProductImageSeeder::class);
     }
 }

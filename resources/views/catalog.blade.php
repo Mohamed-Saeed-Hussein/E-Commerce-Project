@@ -15,9 +15,15 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="text-center mb-8 scroll-animate">
         <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 hover:shadow-lg transition-shadow duration-300">
-            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 bg-primary-600 text-white hover:bg-primary-700 transform hover:scale-105" data-category="all">All</button>
+            <a href="{{ url('/catalog?category=all') }}" 
+               class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === 'all' ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                All
+            </a>
             @forelse($categories as $category)
-            <button class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transform hover:scale-105" data-category="{{ strtolower($category->slug) }}">{{ $category->name }}</button>
+            <a href="{{ url('/catalog?category=' . $category->slug) }}" 
+               class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === $category->slug ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                {{ $category->name }}
+            </a>
             @empty
             <span class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">No categories available</span>
             @endforelse
@@ -27,13 +33,27 @@
     <!-- Products Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($products as $product)
-        <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" data-category="{{ $product->category ? strtolower($product->category->slug) : 'all' }}" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
-            <div class="aspect-w-1 aspect-h-1 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
-                <img src="{{ $product->image ?: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500' }}" 
+        <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
+            <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                @if($product->image)
+                <img src="http://localhost:8000/{{ $product->image }}" 
                      alt="{{ $product->name }}" 
-                     class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                     class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-full h-full flex items-center justify-center" style="display: none;">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+                @else
+                <div class="w-full h-full flex items-center justify-center">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+                @endif
                 <!-- Overlay on hover -->
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                <div class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                     <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -77,45 +97,8 @@
 </div>
 
 <script>
-// Filter functionality
+// Quantity selector functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const productCards = document.querySelectorAll('.product-card');
-    
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update button states
-            filterButtons.forEach(b => {
-                b.classList.remove('bg-primary-600', 'text-white');
-                b.classList.add('text-gray-600', 'hover:text-primary-600', 'dark:text-gray-300', 'dark:hover:text-primary-400');
-            });
-            btn.classList.add('bg-primary-600', 'text-white');
-            btn.classList.remove('text-gray-600', 'hover:text-primary-600', 'dark:text-gray-300', 'dark:hover:text-primary-400');
-
-            // Filter products (fallback to showing all if no matches)
-            const category = btn.getAttribute('data-category');
-            let matches = 0;
-            productCards.forEach(card => {
-                const isMatch = category === 'all' || card.getAttribute('data-category') === category;
-                if (isMatch) {
-                    matches++;
-                    card.style.display = 'block';
-                    card.classList.add('animate-fade-in-up');
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // If nothing matched, show all as a graceful fallback
-            if (matches === 0) {
-                productCards.forEach(card => {
-                    card.style.display = 'block';
-                });
-            }
-        });
-    });
-    
-    // Quantity selector functionality
     document.querySelectorAll('.qty-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const input = this.parentElement.querySelector('.qty-input');
@@ -138,7 +121,7 @@ function addToCart(productId, productName, price, button) {
     
     // Check if user is logged in
     @if(!session('auth.user_id'))
-        alert('Please log in to add items to cart');
+        PopupMessage.error('Please log in to add items to cart');
         return;
     @endif
     
@@ -157,7 +140,10 @@ function addToCart(productId, productName, price, button) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message
+            // Show success popup
+            PopupMessage.success('Product added to cart!');
+            
+            // Update button state
             button.textContent = 'Added!';
             button.classList.add('bg-green-600', 'hover:bg-green-700');
             button.classList.remove('bg-primary-600', 'hover:bg-primary-700');
@@ -174,12 +160,12 @@ function addToCart(productId, productName, price, button) {
                 cartCount.textContent = data.cart_count;
             }
         } else {
-            alert('Error: ' + data.message);
+            PopupMessage.error(data.message || 'Error adding product to cart');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error adding product to cart');
+        PopupMessage.error('Error adding product to cart');
     });
 }
 

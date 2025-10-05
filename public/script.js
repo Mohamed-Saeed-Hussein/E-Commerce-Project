@@ -1,4 +1,4 @@
-// تفعيل القائمة المتنقلة على الأجهزة الصغيرة
+// Enable mobile menu on small devices
 document.addEventListener('DOMContentLoaded', function () {
   const navToggle = document.querySelector('.nav-toggle');
   const navMenu = document.querySelector('.nav-menu');

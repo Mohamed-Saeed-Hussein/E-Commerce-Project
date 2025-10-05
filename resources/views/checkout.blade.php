@@ -41,7 +41,7 @@
                 <!-- Shipping Information -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Shipping Information</h3>
-                    <form id="checkoutForm" class="space-y-4">
+                    <form id="checkoutForm" class="space-y-4" method="POST" action="{{ url('/checkout') }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             if (!fullName || !emailOk || !address || !city || !postalCode || !country || !phone) {
-                alert('Please fill out all fields correctly.');
+                PopupMessage.error('Please fill out all fields correctly.');
                 return;
             }
 
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('There was an error processing your order. Please try again.');
+                PopupMessage.error('There was an error processing your order. Please try again.');
             });
         });
     }

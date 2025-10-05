@@ -100,36 +100,24 @@
             <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @forelse($products as $product)
                 <div class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 scroll-animate cursor-pointer" style="animation-delay: {{ $loop->index * 0.1 }}s" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
-                    <div class="aspect-w-3 aspect-h-4 bg-gray-200 dark:bg-gray-600 group-hover:opacity-90 transition-opacity duration-300">
+                    <div class="w-full h-64 bg-gray-200 dark:bg-gray-600 group-hover:opacity-90 transition-opacity duration-300">
                         @if($product->image)
-                        <img src="{{ $product->image }}" alt="{{ $product->name }}" class="w-full h-48 object-cover object-center group-hover:scale-110 transition-transform duration-500">
+                        <img src="http://localhost:8000/{{ $product->image }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         @else
-                        <div class="w-full h-48 flex items-center justify-center group-hover:bg-gray-100 dark:group-hover:bg-gray-500 transition-colors duration-300">
+                        <div class="w-full h-64 flex items-center justify-center group-hover:bg-gray-100 dark:group-hover:bg-gray-500 transition-colors duration-300">
                             <svg class="h-12 w-12 text-gray-400 group-hover:text-gray-500 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
                         @endif
                         <!-- Overlay on hover -->
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                             <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </div>
-                        </div>
-                    </div>
-                    <div class="p-6 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors duration-300">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
-                            {{ $product->name }}
-                        </h3>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">{{ Str::limit($product->description, 100) }}</p>
-                        <div class="mt-4 flex items-center justify-between">
-                            <p class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">${{ number_format($product->price, 2) }}</p>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $product->is_available ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 group-hover:bg-green-200 dark:group-hover:bg-green-800' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 group-hover:bg-red-200 dark:group-hover:bg-red-800' }} transition-colors duration-300">
-                                {{ $product->is_available ? 'In Stock' : 'Out of Stock' }}
-                            </span>
                         </div>
                     </div>
                 </div>

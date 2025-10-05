@@ -39,7 +39,15 @@ class ProductController extends Controller
             'category_id' => 'nullable|exists:categories,id',
         ]);
         
-        Product::create($request->all());
+        Product::create($request->only([
+            'name',
+            'price',
+            'description',
+            'quantity',
+            'is_available',
+            'image',
+            'category_id',
+        ]));
         
         return redirect('/admin/products')->with('status', 'Product created successfully!');
     }
@@ -63,7 +71,15 @@ class ProductController extends Controller
         ]);
         
         $product = Product::findOrFail($id);
-        $product->update($request->all());
+        $product->update($request->only([
+            'name',
+            'price',
+            'description',
+            'quantity',
+            'is_available',
+            'image',
+            'category_id',
+        ]));
         
         return redirect('/admin/products')->with('status', 'Product updated successfully!');
     }

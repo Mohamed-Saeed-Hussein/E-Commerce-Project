@@ -15,9 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\RememberMeMiddleware::class,
             // \App\Http\Middleware\AdminRedirectMiddleware::class, // Temporarily disabled
         ]);
-        
+
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+            'auth.session' => \App\Http\Middleware\AuthSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

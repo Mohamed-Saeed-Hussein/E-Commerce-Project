@@ -56,13 +56,20 @@ class AuthController extends Controller
         // Handle Remember Me functionality
         if ($remember) {
             $rememberToken = $user->generateRememberToken();
-            
-            // Set a remember me cookie that expires in 30 days
-            $cookie = cookie('remember_me', $rememberToken, 60 * 24 * 30); // 30 days
-            
-            // Set session lifetime to 30 days for remember me
+            // Harden cookie: HttpOnly, Secure (honors APP_ENV), SameSite=Lax
+            $minutes = 60 * 24 * 30;
+            $cookie = cookie(
+                name: 'remember_me',
+                value: $rememberToken,
+                minutes: $minutes,
+                path: '/',
+                domain: null,
+                secure: app()->environment('production'),
+                httpOnly: true,
+                raw: false,
+                sameSite: 'lax'
+            );
             $request->session()->put('auth.remember', true);
-            
             return redirect($user->role === 'admin' ? '/admin' : '/home')->withCookie($cookie);
         }
 
@@ -141,10 +148,21 @@ class AuthController extends Controller
         }
         
         $request->session()->invalidate();
+        $request->session()->regenerateToken();
         
         // Clear the remember me cookie
-        $cookie = cookie('remember_me', '', -1);
-        
+        $cookie = cookie(
+            name: 'remember_me',
+            value: '',
+            minutes: -1,
+            path: '/',
+            domain: null,
+            secure: app()->environment('production'),
+            httpOnly: true,
+            raw: false,
+            sameSite: 'lax'
+        );
+
         return redirect('/')->withCookie($cookie);
     }
 }

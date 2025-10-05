@@ -150,7 +150,10 @@
                                 <li><a href="{{ url('/orders') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> My Orders </a></li>
                             </ul>
                             <div class="p-2 text-sm font-medium text-gray-900 dark:text-white">
-                                <a href="{{ url('/logout') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"> Sign Out </a>
+                                <form method="POST" action="{{ url('/logout') }}">
+                                    @csrf
+                                    <button type="submit" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"> Sign Out </button>
+                                </form>
                             </div>
                         </div>
                         </div>
@@ -208,6 +211,9 @@
         <main class="flex-1">
         @yield('content')
     </main>
+
+    <!-- Popup Message System -->
+    @include('partials.popup-message')
 
         <!-- Footer -->
         <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">

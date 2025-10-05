@@ -38,9 +38,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Product Image -->
             <div class="space-y-4">
-                <div class="aspect-w-1 aspect-h-1 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+                <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-4 min-h-96">
                     @if($product->image)
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="w-full h-96 object-cover object-center">
+                    <img src="http://localhost:8000/{{ $product->image }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
                     @else
                     <div class="w-full h-96 flex items-center justify-center">
                         <svg class="h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@
                         </div>
                     </div>
 
-                    <button onclick="addToCart()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200">
+                    <button id="addToCartBtn" onclick="addToCart()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 font-medium">
                         Add to Cart
                     </button>
                 </div>
@@ -100,9 +100,9 @@
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 @forelse($similarProducts as $similarProduct)
                 <div class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 scroll-animate cursor-pointer" onclick="window.location.href='{{ url('/product/' . $similarProduct->id) }}'">
-                    <div class="aspect-w-1 aspect-h-1 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                    <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                         @if($similarProduct->image)
-                        <img src="{{ $similarProduct->image }}" alt="{{ $similarProduct->name }}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img src="http://localhost:8000/{{ $similarProduct->image }}" alt="{{ $similarProduct->name }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         @else
                         <div class="w-full h-64 flex items-center justify-center group-hover:bg-gray-100 dark:group-hover:bg-gray-500 transition-colors duration-300">
                             <svg class="h-12 w-12 text-gray-400 group-hover:text-gray-500 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,7 +111,7 @@
                         </div>
                         @endif
                         <!-- Overlay on hover -->
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                             <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -164,12 +164,18 @@ function increaseQuantity() {
 function addToCart() {
     const quantity = document.getElementById('quantity').value;
     const productId = {{ $product->id }};
+    const button = document.getElementById('addToCartBtn');
     
     // Check if user is logged in
     @if(!session('auth.user_id'))
-        alert('Please log in to add items to cart');
+        PopupMessage.error('Please log in to add items to cart');
         return;
     @endif
+    
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Adding...';
+    button.classList.add('opacity-75', 'cursor-not-allowed');
     
     // Add to cart via AJAX
     fetch('{{ url("/cart/add") }}', {
@@ -186,19 +192,43 @@ function addToCart() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Product added to cart!');
+            // Show success popup
+            PopupMessage.success('Product added to cart!');
+            
+            // Update button state with animations
+            button.textContent = 'Added!';
+            button.classList.add('bg-green-600', 'hover:bg-green-700');
+            button.classList.remove('bg-primary-600', 'hover:bg-primary-700', 'opacity-75', 'cursor-not-allowed');
+            button.classList.add('transform', 'scale-105');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.textContent = 'Add to Cart';
+                button.classList.remove('bg-green-600', 'hover:bg-green-700', 'transform', 'scale-105');
+                button.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                button.disabled = false;
+            }, 2000);
+            
             // Update cart count if element exists
             const cartCount = document.getElementById('cartCount');
             if (cartCount) {
                 cartCount.textContent = data.cart_count;
             }
         } else {
-            alert('Error: ' + data.message);
+            // Reset button on error
+            button.textContent = 'Add to Cart';
+            button.classList.remove('opacity-75', 'cursor-not-allowed');
+            button.disabled = false;
+            PopupMessage.error(data.message || 'Error adding product to cart');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error adding product to cart');
+        // Reset button on error
+        button.textContent = 'Add to Cart';
+        button.classList.remove('opacity-75', 'cursor-not-allowed');
+        button.disabled = false;
+        PopupMessage.error('Error adding product to cart');
     });
 }
 </script>

@@ -23,7 +23,7 @@
                         <div class="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow duration-200" data-product-id="{{ $item->product_id }}">
                             <div class="flex-shrink-0">
                                 @if($item->product->image)
-                                <img src="{{ $item->product->image }}" alt="{{ $item->product->name }}" class="h-20 w-20 object-cover rounded-md">
+                                <img src="{{ url($item->product->image) }}" alt="{{ $item->product->name }}" class="h-20 w-20 object-cover rounded-md">
                                 @else
                                 <div class="h-20 w-20 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
                                     <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,7 +188,7 @@ function updateQuantity(productId, newQuantity) {
                 cartCount.textContent = data.cart_count;
             }
         } else {
-            alert('Error: ' + data.message);
+            PopupMessage.error(data.message || 'Error updating quantity');
             // Revert the input value on error
             const quantityInput = document.getElementById('quantity_' + productId);
             quantityInput.value = quantityInput.getAttribute('data-previous-value') || 1;
@@ -196,7 +196,7 @@ function updateQuantity(productId, newQuantity) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error updating quantity');
+        PopupMessage.error('Error updating quantity');
         // Revert the input value on error
         const quantityInput = document.getElementById('quantity_' + productId);
         quantityInput.value = quantityInput.getAttribute('data-previous-value') || 1;
@@ -276,12 +276,12 @@ function removeFromCart(productId) {
                     location.reload();
                 }
             } else {
-                alert('Error: ' + data.message);
+                PopupMessage.error(data.message || 'Error removing item');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error removing item');
+            PopupMessage.error('Error removing item');
         });
     }
 }

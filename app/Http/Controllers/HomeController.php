@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $products = Product::where('is_available', true)->take(6)->get();
+        $products = Product::where('is_available', true)->inRandomOrder()->take(6)->get();
         return view('home', ['products' => $products]);
     }
 }
