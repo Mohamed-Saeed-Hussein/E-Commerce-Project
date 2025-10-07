@@ -45,23 +45,51 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'fullName' => 'required|string|max:255',
+            'fullName' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'email' => 'required|email|max:255',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'billingName' => 'nullable|string|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'postal_code' => 'required|string|max:20|regex:/^[a-zA-Z0-9\s-]+$/',
+            'country' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'phone' => 'required|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
+            'billingName' => 'nullable|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'billingEmail' => 'nullable|email|max:255',
-            'billingAddress' => 'nullable|string|max:255',
-            'billingCity' => 'nullable|string|max:255',
-            'billingPostalCode' => 'nullable|string|max:20',
-            'billingCountry' => 'nullable|string|max:255',
-            'billingPhone' => 'nullable|string|max:20',
+            'billingAddress' => 'nullable|string|max:500',
+            'billingCity' => 'nullable|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'billingPostalCode' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s-]+$/',
+            'billingCountry' => 'nullable|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'billingPhone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
+        ], [
+            'fullName.required' => 'Full name is required',
+            'fullName.regex' => 'Full name must contain only letters and spaces',
+            'email.required' => 'Email is required',
+            'email.email' => 'Please enter a valid email address',
+            'address.required' => 'Address is required',
+            'city.required' => 'City is required',
+            'city.regex' => 'City must contain only letters and spaces',
+            'postal_code.required' => 'Postal code is required',
+            'postal_code.regex' => 'Invalid postal code format',
+            'country.required' => 'Country is required',
+            'country.regex' => 'Country must contain only letters and spaces',
+            'phone.required' => 'Phone number is required',
+            'phone.regex' => 'Invalid phone number format',
         ]);
 
         $userId = session('auth.user_id');
+        
+        // Verify cart has items
+        $cartItems = Cart::getCartItems($userId);
+        if ($cartItems->isEmpty()) {
+            return redirect('/cart')->with('error', 'Your cart is empty');
+        }
+
+        // Double-check stock availability before processing order
+        foreach ($cartItems as $cartItem) {
+            $product = Product::find($cartItem->product_id);
+            if (!$product || !$product->is_available || $cartItem->quantity > $product->quantity) {
+                return redirect('/cart')->with('error', 'Some items in your cart are no longer available. Please review your cart.');
+            }
+        }
         
         // Prepare shipping address
         $shippingAddress = $request->input('address');
@@ -87,28 +115,50 @@ class OrderController extends Controller
             'phone' => $request->input('billingPhone', $request->input('phone')),
         ];
 
-        $order = Order::createFromCart($userId, $shippingAddress, $billingAddress, $shippingDetails, $billingDetails);
+        try {
+            $order = Order::createFromCart($userId, $shippingAddress, $billingAddress, $shippingDetails, $billingDetails);
 
-        if ($order) {
-            // Get the user details for email
-            $user = User::find($userId);
-            
-            if ($user) {
-                // Load the order with items and products for email
-                $order->load('items.product');
+            if ($order) {
+                // Get the user details for email
+                $user = User::find($userId);
                 
-                // Send order confirmation email
-                try {
-                    Mail::to($user->email)->send(new OrderConfirmationMail($order, $user, $shippingDetails));
-                } catch (\Exception $e) {
-                    // Log the error but don't fail the order
-                    \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
+                if ($user) {
+                    // Load the order with items and products for email
+                    $order->load('items.product');
+                    
+                    // Send order confirmation email
+                    try {
+                        Mail::to($user->email)->send(new OrderConfirmationMail($order, $user, $shippingDetails));
+                    } catch (\Exception $e) {
+                        // Log the error but don't fail the order
+                        \Log::error('Failed to send order confirmation email', [
+                            'order_id' => $order->id,
+                            'user_id' => $userId,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
                 }
+                
+                // Log successful order
+                \Log::info('Order created successfully', [
+                    'order_id' => $order->id,
+                    'user_id' => $userId,
+                    'total_amount' => $order->total_amount,
+                    'items_count' => $order->items->count()
+                ]);
+                
+                return redirect('/orders')->with('success', 'Order placed successfully! You will receive a confirmation email shortly.');
+            } else {
+                return redirect('/cart')->with('error', 'Failed to process your order. Please try again.');
             }
+        } catch (\Exception $e) {
+            \Log::error('Order processing failed', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             
-            return redirect('/orders')->with('success', 'Order placed successfully!');
-        } else {
-            return redirect('/cart')->with('error', 'Your cart is empty');
+            return redirect('/cart')->with('error', 'An error occurred while processing your order. Please try again.');
         }
     }
 }

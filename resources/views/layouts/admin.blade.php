@@ -143,7 +143,15 @@
                                 <li><a href="{{ url('/admin') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"> Admin Dashboard </a></li>
                             </ul>
                             <div class="p-2 text-sm font-medium text-gray-900 dark:text-white">
-                                <a href="{{ url('/logout') }}" title="" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"> Sign Out </a>
+                                <form method="POST" action="{{ url('/logout') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        Sign Out
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         </div>
@@ -187,7 +195,25 @@
                         <li>
                             <a href="{{ url('/admin/messages') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Messages</a>
                         </li>
-                        @if(!session('auth.user_id'))
+                        @if(session('auth.user_id'))
+                        <li>
+                            <a href="{{ url('/profile') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">My Profile</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Admin Dashboard</a>
+                        </li>
+                        <li>
+                            <form method="POST" action="{{ url('/logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-2 hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </li>
+                        @else
                         <li>
                             <a href="{{ url('/login') }}" class="hover:text-primary-700 dark:hover:text-primary-500 transition-all duration-200 hover:scale-105 hover:underline">Sign In</a>
                         </li>
@@ -244,8 +270,8 @@
         </footer>
     </div>
 
-    <!-- Flowbite JS for dropdowns and components -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <!-- Flowbite JS - Commented out to prevent conflicts with custom dropdown -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script> -->
     <style>
         /* Fix dropdown positioning and disable animations */
         #userDropdown1 {
@@ -257,6 +283,8 @@
             transition: none !important;
             animation: none !important;
             margin-top: 0.5rem !important;
+            z-index: 1000 !important;
+            min-width: 14rem !important;
         }
         #userDropdown1.hidden {
             display: none !important;
@@ -265,8 +293,12 @@
             display: block !important;
         }
         /* Ensure the button container has relative positioning */
-        #userDropdownButton1 {
+        .relative {
             position: relative !important;
+        }
+        /* Ensure dropdown is visible above other elements */
+        #userDropdown1 {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
         }
     </style>
 
@@ -314,6 +346,35 @@
             });
         }
 
+        // User dropdown toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userDropdownButton = document.getElementById('userDropdownButton1');
+            const userDropdown = document.getElementById('userDropdown1');
+            
+            if (userDropdownButton && userDropdown) {
+                // Toggle dropdown on button click
+                userDropdownButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userDropdownButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+                
+                // Close dropdown on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
         // Scroll-triggered animations
         function handleScrollAnimations() {
             const elements = document.querySelectorAll('.scroll-animate');
@@ -330,6 +391,25 @@
         // Run on scroll and on load
         window.addEventListener('scroll', handleScrollAnimations);
         window.addEventListener('load', handleScrollAnimations);
+
+        // Prevent accidental GET requests to logout
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.href && e.target.href.includes('/logout')) {
+                e.preventDefault();
+                console.warn('Please use the logout button instead of direct links.');
+            }
+        });
+
+        // Ensure logout forms work properly
+        document.addEventListener('submit', function(e) {
+            if (e.target.action && e.target.action.includes('/logout')) {
+                // Ensure it's a POST request
+                if (e.target.method.toLowerCase() !== 'post') {
+                    e.preventDefault();
+                    console.error('Logout form must use POST method.');
+                }
+            }
+        });
 
     </script>
 </body>

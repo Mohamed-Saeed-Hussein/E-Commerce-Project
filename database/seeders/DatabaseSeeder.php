@@ -17,14 +17,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create test user
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('password123'),
+                'role' => 'user'
+            ]
+        );
 
         // Seed default categories if not present
         $defaultCategories = [
-            'Accessories', 'Bags', 'Pants', 'Shoes', 'Socks', 'T-shirts', 'Watchs'
+            'Accessories', 'Bags', 'Pants', 'Shoes', 'Socks', 'T-shirts', 'Watches'
         ];
 
         foreach ($defaultCategories as $categoryName) {
@@ -34,7 +39,7 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Ensure only one admin user exists (admin@gmail.com / password: admin@gmail.com)
+        // Ensure only one admin user exists (admin@gmail.com / password: admin123!)
         // First, remove any existing admins
         User::where('role', 'admin')->delete();
         
@@ -42,11 +47,14 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin@gmail.com'),
+            'password' => Hash::make('admin123!'),
+            'role' => 'admin'
         ]);
         
-        // Set admin role using the protected method
-        $admin->setAdminRole();
+        \Log::info('Admin user created', [
+            'email' => 'admin@gmail.com',
+            'name' => 'Admin'
+        ]);
         
         // Seed products with images
         $this->call(ProductImageSeeder::class);

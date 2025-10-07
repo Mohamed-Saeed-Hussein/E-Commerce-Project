@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -28,7 +29,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $guarded = ['role'];
+    protected $guarded = ['id', 'role', 'remember_token'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -49,11 +50,12 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'email_verified_at' => 'datetime',
         ];
     }
 
     /**
-     * Generate a new remember token for the user.
+     * Generate a new remember token for the user with enhanced security.
      */
     public function generateRememberToken()
     {
@@ -79,6 +81,11 @@ class User extends Authenticatable
     {
         $this->role = 'admin';
         $this->save();
+        
+        \Log::info('User role changed to admin', [
+            'user_id' => $this->id,
+            'email' => $this->email
+        ]);
     }
 
     /**
@@ -87,6 +94,14 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser()
+    {
+        return $this->role === 'user';
     }
 
     /**
@@ -111,5 +126,21 @@ class User extends Authenticatable
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Scope to get only admin users
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    /**
+     * Scope to get only regular users
+     */
+    public function scopeUsers($query)
+    {
+        return $query->where('role', 'user');
     }
 }

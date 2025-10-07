@@ -10,6 +10,9 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Categories</h1>
                 <p class="mt-2 text-gray-600 dark:text-gray-400">Manage product categories</p>
             </div>
+            <a href="{{ url('/admin/categories/create') }}" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                Add Category
+            </a>
         </div>
 
         @if (session('status'))
@@ -46,11 +49,16 @@
                 @forelse(\App\Models\Category::orderBy('name')->get() as $category)
                 <li class="px-4 py-3 flex items-center justify-between">
                     <div class="text-gray-900 dark:text-white">{{ $category->name }}</div>
-                    <form method="POST" action="{{ url('/admin/categories/' . $category->id) }}" onsubmit="return confirm('Delete this category?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Delete</button>
-                    </form>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ url('/admin/categories/' . $category->id . '/edit') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            Edit
+                        </a>
+                        <form method="POST" action="{{ url('/admin/categories/' . $category->id) }}" onsubmit="return confirm('Delete this category?')" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                        </form>
+                    </div>
                 </li>
                 @empty
                 <li class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No categories available</li>

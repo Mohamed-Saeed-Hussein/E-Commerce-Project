@@ -30,28 +30,67 @@ class AuthController extends Controller
         ]);
 
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:8',
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:8|max:255',
         ], [
             'email.required' => 'Email is required',
             'email.email' => 'Please enter a valid email address',
+            'email.max' => 'Email address is too long',
             'password.required' => 'Password is required',
             'password.min' => 'Password must be at least 8 characters long',
+            'password.max' => 'Password is too long',
         ]);
 
         $email = $request->input('email');
         $password = $request->input('password');
         $remember = $request->has('remember');
 
+        // Rate limiting check (additional to route middleware)
+        $key = 'login_attempts_' . $request->ip();
+        $attempts = cache()->get($key, 0);
+        if ($attempts >= 5) {
+            \Log::warning('Login rate limit exceeded', [
+                'ip' => $request->ip(),
+                'email' => $email,
+                'attempts' => $attempts
+            ]);
+            return back()->withErrors(['email' => 'Too many login attempts. Please try again later.'])->withInput();
+        }
+
         $user = User::where('email', $email)->first();
         if (!$user || !Hash::check($password, $user->password)) {
+            // Increment failed attempts
+            cache()->put($key, $attempts + 1, 300); // 5 minutes
+            
+            \Log::warning('Failed login attempt', [
+                'ip' => $request->ip(),
+                'email' => $email,
+                'user_agent' => $request->userAgent()
+            ]);
+            
             return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
+
+        // Clear failed attempts on successful login
+        cache()->forget($key);
+
+        // Regenerate session ID for security
+        $request->session()->regenerate();
 
         $request->session()->put('auth.user_id', $user->id);
         $request->session()->put('auth.email', $user->email);
         $request->session()->put('auth.name', $user->name);
         $request->session()->put('auth.role', $user->role);
+        $request->session()->put('auth.last_activity', time());
+
+        // Log successful login
+        \Log::info('Successful login', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'remember' => $remember
+        ]);
 
         // Handle Remember Me functionality
         if ($remember) {
@@ -101,52 +140,99 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/|min:2',
             'email' => 'required|email|unique:users,email|max:255',
-            'password' => 'required|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
+            'password' => 'required|min:8|max:255|regex:/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
             'password_confirmation' => 'required|same:password',
         ], [
             'name.required' => 'Name is required',
             'name.regex' => 'Name must contain only letters and spaces',
             'name.min' => 'Name must be at least 2 characters long',
+            'name.max' => 'Name is too long',
             'email.required' => 'Email is required',
             'email.email' => 'Please enter a valid email address',
             'email.unique' => 'This email is already registered',
+            'email.max' => 'Email address is too long',
             'password.required' => 'Password is required',
             'password.min' => 'Password must be at least 8 characters long',
+            'password.max' => 'Password is too long',
             'password.regex' => 'Password must contain letters, numbers, and special characters',
             'password_confirmation.required' => 'Please confirm your password',
             'password_confirmation.same' => 'Password confirmation does not match',
         ]);
 
-        $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-        ]);
-        
-        // Set role to user after creation
-        $user->role = 'user';
-        $user->save();
+        // Rate limiting for registration
+        $key = 'register_attempts_' . $request->ip();
+        $attempts = cache()->get($key, 0);
+        if ($attempts >= 3) {
+            \Log::warning('Registration rate limit exceeded', [
+                'ip' => $request->ip(),
+                'email' => $request->input('email')
+            ]);
+            return back()->withErrors(['email' => 'Too many registration attempts. Please try again later.'])->withInput();
+        }
 
-        // Log the user in immediately after registration
-        $request->session()->put('auth.user_id', $user->id);
-        $request->session()->put('auth.email', $user->email);
-        $request->session()->put('auth.name', $user->name);
-        $request->session()->put('auth.role', $user->role);
+        try {
+            $user = User::create([
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => Hash::make($request->input('password')),
+                'role' => 'user', // Explicitly set role
+            ]);
 
-        return redirect('/home');
+            // Clear failed attempts on successful registration
+            cache()->forget($key);
+
+            // Regenerate session ID for security
+            $request->session()->regenerate();
+
+            // Log the user in immediately after registration
+            $request->session()->put('auth.user_id', $user->id);
+            $request->session()->put('auth.email', $user->email);
+            $request->session()->put('auth.name', $user->name);
+            $request->session()->put('auth.role', $user->role);
+            $request->session()->put('auth.last_activity', time());
+
+            // Log successful registration
+            \Log::info('Successful registration', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return redirect('/home')->with('success', 'Registration successful! Welcome to our store.');
+        } catch (\Exception $e) {
+            // Increment failed attempts
+            cache()->put($key, $attempts + 1, 300); // 5 minutes
+            
+            \Log::error('Registration failed', [
+                'email' => $request->input('email'),
+                'ip' => $request->ip(),
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->withErrors(['email' => 'Registration failed. Please try again.'])->withInput();
+        }
     }
 
     public function logout(Request $request)
     {
-        // Clear remember me token if user is logged in
+        // Log logout for security auditing
         if ($request->session()->has('auth.user_id')) {
             $userId = $request->session()->get('auth.user_id');
+            \Log::info('User logout', [
+                'user_id' => $userId,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+            
+            // Clear remember me token if user is logged in
             $user = User::find($userId);
             if ($user) {
                 $user->clearRememberToken();
             }
         }
         
+        // Invalidate session completely
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
@@ -163,6 +249,6 @@ class AuthController extends Controller
             sameSite: 'lax'
         );
 
-        return redirect('/')->withCookie($cookie);
+        return redirect('/')->with('success', 'You have been logged out successfully.')->withCookie($cookie);
     }
 }

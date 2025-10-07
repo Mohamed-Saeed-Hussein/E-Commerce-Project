@@ -6,23 +6,14 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Users</h1>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">View user accounts and information</p>
-            <div class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-blue-800">
-                            <strong>Note:</strong> User roles cannot be changed through this interface. Admin privileges can only be granted through database operations by the developer.
-                        </p>
-                    </div>
-                </div>
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Users</h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">View user accounts and information</p>
             </div>
+            <a href="{{ url('/admin/users/create') }}" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                Add User
+            </a>
         </div>
 
         @if (session('status'))
@@ -80,7 +71,18 @@
                             @if($user->id == session('auth.user_id'))
                                 <span class="text-sm text-gray-500 dark:text-gray-400">Current User</span>
                             @else
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Admin - Read Only</span>
+                                <div class="flex items-center space-x-2">
+                                    <a href="{{ url('/admin/users/' . $user->id . '/edit') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                        Edit
+                                    </a>
+                                    <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" onsubmit="return confirm('Delete this user?')" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -124,9 +126,17 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <!-- User info is read-only -->
                             <div class="flex items-center space-x-2">
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Read-only</span>
+                                <a href="{{ url('/admin/users/' . $user->id . '/edit') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                    Edit
+                                </a>
+                                <form method="POST" action="{{ url('/admin/users/' . $user->id) }}" onsubmit="return confirm('Delete this user?')" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

@@ -30,26 +30,57 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'required|string',
-            'quantity' => 'required|integer|min:0',
+            'name' => 'required|string|max:255|min:2',
+            'price' => 'required|numeric|min:0|max:999999.99',
+            'description' => 'required|string|min:10|max:2000',
+            'quantity' => 'required|integer|min:0|max:999999',
             'is_available' => 'required|boolean',
-            'image' => 'nullable|url',
+            'image' => 'nullable|url|max:500',
             'category_id' => 'nullable|exists:categories,id',
+        ], [
+            'name.required' => 'Product name is required',
+            'name.min' => 'Product name must be at least 2 characters',
+            'name.max' => 'Product name is too long',
+            'price.required' => 'Price is required',
+            'price.min' => 'Price must be at least 0',
+            'price.max' => 'Price is too high',
+            'description.required' => 'Description is required',
+            'description.min' => 'Description must be at least 10 characters',
+            'description.max' => 'Description is too long',
+            'quantity.required' => 'Quantity is required',
+            'quantity.min' => 'Quantity must be at least 0',
+            'quantity.max' => 'Quantity is too high',
+            'image.url' => 'Image must be a valid URL',
+            'image.max' => 'Image URL is too long',
+            'category_id.exists' => 'Selected category does not exist',
         ]);
         
-        Product::create($request->only([
-            'name',
-            'price',
-            'description',
-            'quantity',
-            'is_available',
-            'image',
-            'category_id',
-        ]));
-        
-        return redirect('/admin/products')->with('status', 'Product created successfully!');
+        try {
+            Product::create($request->only([
+                'name',
+                'price',
+                'description',
+                'quantity',
+                'is_available',
+                'image',
+                'category_id',
+            ]));
+            
+            \Log::info('Product created', [
+                'admin_user_id' => session('auth.user_id'),
+                'product_name' => $request->input('name'),
+                'price' => $request->input('price')
+            ]);
+            
+            return redirect('/admin/products')->with('status', 'Product created successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Failed to create product', [
+                'admin_user_id' => session('auth.user_id'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->withErrors(['error' => 'Failed to create product. Please try again.'])->withInput();
+        }
     }
 
     public function edit($id)
@@ -61,35 +92,94 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'required|string',
-            'quantity' => 'required|integer|min:0',
+            'name' => 'required|string|max:255|min:2',
+            'price' => 'required|numeric|min:0|max:999999.99',
+            'description' => 'required|string|min:10|max:2000',
+            'quantity' => 'required|integer|min:0|max:999999',
             'is_available' => 'required|boolean',
-            'image' => 'nullable|url',
+            'image' => 'nullable|url|max:500',
             'category_id' => 'nullable|exists:categories,id',
+        ], [
+            'name.required' => 'Product name is required',
+            'name.min' => 'Product name must be at least 2 characters',
+            'name.max' => 'Product name is too long',
+            'price.required' => 'Price is required',
+            'price.min' => 'Price must be at least 0',
+            'price.max' => 'Price is too high',
+            'description.required' => 'Description is required',
+            'description.min' => 'Description must be at least 10 characters',
+            'description.max' => 'Description is too long',
+            'quantity.required' => 'Quantity is required',
+            'quantity.min' => 'Quantity must be at least 0',
+            'quantity.max' => 'Quantity is too high',
+            'image.url' => 'Image must be a valid URL',
+            'image.max' => 'Image URL is too long',
+            'category_id.exists' => 'Selected category does not exist',
         ]);
         
-        $product = Product::findOrFail($id);
-        $product->update($request->only([
-            'name',
-            'price',
-            'description',
-            'quantity',
-            'is_available',
-            'image',
-            'category_id',
-        ]));
-        
-        return redirect('/admin/products')->with('status', 'Product updated successfully!');
+        try {
+            $product = Product::findOrFail($id);
+            $oldData = $product->toArray();
+            
+            $product->update($request->only([
+                'name',
+                'price',
+                'description',
+                'quantity',
+                'is_available',
+                'image',
+                'category_id',
+            ]));
+            
+            \Log::info('Product updated', [
+                'admin_user_id' => session('auth.user_id'),
+                'product_id' => $id,
+                'old_data' => $oldData,
+                'new_data' => $product->toArray()
+            ]);
+            
+            return redirect('/admin/products')->with('status', 'Product updated successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Failed to update product', [
+                'admin_user_id' => session('auth.user_id'),
+                'product_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->withErrors(['error' => 'Failed to update product. Please try again.'])->withInput();
+        }
     }
 
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
-        
-        return redirect('/admin/products')->with('status', 'Product deleted successfully!');
+        try {
+            $product = Product::findOrFail($id);
+            $productData = $product->toArray();
+            
+            // Check if product has orders
+            $hasOrders = $product->orderItems()->exists();
+            if ($hasOrders) {
+                return redirect('/admin/products')->with('error', 'Cannot delete product that has been ordered. Consider marking it as unavailable instead.');
+            }
+            
+            $product->delete();
+            
+            \Log::info('Product deleted', [
+                'admin_user_id' => session('auth.user_id'),
+                'product_id' => $id,
+                'product_data' => $productData
+            ]);
+            
+            return redirect('/admin/products')->with('status', 'Product deleted successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete product', [
+                'admin_user_id' => session('auth.user_id'),
+                'product_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect('/admin/products')->with('error', 'Failed to delete product. Please try again.');
+        }
     }
 
     public function importProducts()

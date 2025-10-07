@@ -40,7 +40,7 @@
             <div class="space-y-4">
                 <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-4 min-h-96">
                     @if($product->image)
-                    <img src="http://localhost:8000/{{ $product->image }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
+                    <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
                     @else
                     <div class="w-full h-96 flex items-center justify-center">
                         <svg class="h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +102,7 @@
                 <div class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 scroll-animate cursor-pointer" onclick="window.location.href='{{ url('/product/' . $similarProduct->id) }}'">
                     <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                         @if($similarProduct->image)
-                        <img src="http://localhost:8000/{{ $similarProduct->image }}" alt="{{ $similarProduct->name }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
+                        <img src="{{ url($similarProduct->image) }}" alt="{{ $similarProduct->name }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         @else
                         <div class="w-full h-64 flex items-center justify-center group-hover:bg-gray-100 dark:group-hover:bg-gray-500 transition-colors duration-300">
                             <svg class="h-12 w-12 text-gray-400 group-hover:text-gray-500 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -129,16 +129,6 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Recent Activity</h2>
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No recent activity</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Activity will appear here as users interact with your store.</p>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -27,32 +27,72 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'product_id' => 'required|integer|exists:products,id',
+            'quantity' => 'required|integer|min:1|max:100'
+        ], [
+            'product_id.required' => 'Product ID is required',
+            'product_id.integer' => 'Invalid product ID',
+            'product_id.exists' => 'Product not found',
+            'quantity.required' => 'Quantity is required',
+            'quantity.integer' => 'Quantity must be a number',
+            'quantity.min' => 'Quantity must be at least 1',
+            'quantity.max' => 'Quantity cannot exceed 100'
         ]);
 
         $userId = session('auth.user_id');
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity');
+        $productId = (int) $request->input('product_id');
+        $quantity = (int) $request->input('quantity');
 
-        // Get product details
+        // Get product details with proper error handling
         $product = Product::find($productId);
-        if (!$product || !$product->is_available) {
-            return response()->json(['success' => false, 'message' => 'Product not available']);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found']);
+        }
+
+        if (!$product->is_available) {
+            return response()->json(['success' => false, 'message' => 'Product is currently unavailable']);
         }
 
         // Check if quantity is available
         if ($quantity > $product->quantity) {
-            return response()->json(['success' => false, 'message' => 'Not enough stock available']);
+            return response()->json(['success' => false, 'message' => 'Not enough stock available. Only ' . $product->quantity . ' items in stock.']);
         }
 
-        // Add to cart
-        Cart::addToCart($userId, $productId, $quantity, $product->price);
+        // Check current cart quantity to prevent exceeding stock
+        $currentCartQuantity = Cart::where('user_id', $userId)
+                                 ->where('product_id', $productId)
+                                 ->sum('quantity');
+        
+        if (($currentCartQuantity + $quantity) > $product->quantity) {
+            return response()->json(['success' => false, 'message' => 'Adding this quantity would exceed available stock.']);
+        }
 
-        // Get updated cart count
-        $cartCount = Cart::where('user_id', $userId)->sum('quantity');
+        try {
+            // Add to cart
+            Cart::addToCart($userId, $productId, $quantity, $product->price);
 
-        return response()->json(['success' => true, 'cart_count' => $cartCount]);
+            // Get updated cart count
+            $cartCount = Cart::where('user_id', $userId)->sum('quantity');
+
+            // Log cart addition for analytics
+            \Log::info('Item added to cart', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'price' => $product->price
+            ]);
+
+            return response()->json(['success' => true, 'cart_count' => $cartCount]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to add item to cart', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['success' => false, 'message' => 'Failed to add item to cart. Please try again.']);
+        }
     }
 
     public function count()
@@ -74,19 +114,43 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'product_id' => 'required|exists:products,id'
+            'product_id' => 'required|integer|exists:products,id'
+        ], [
+            'product_id.required' => 'Product ID is required',
+            'product_id.integer' => 'Invalid product ID',
+            'product_id.exists' => 'Product not found'
         ]);
 
         $userId = session('auth.user_id');
-        $productId = $request->input('product_id');
+        $productId = (int) $request->input('product_id');
 
-        Cart::where('user_id', $userId)
-           ->where('product_id', $productId)
-           ->delete();
+        try {
+            $deleted = Cart::where('user_id', $userId)
+                          ->where('product_id', $productId)
+                          ->delete();
 
-        $cartCount = Cart::where('user_id', $userId)->sum('quantity');
-
-        return response()->json(['success' => true, 'cart_count' => $cartCount]);
+            if ($deleted) {
+                $cartCount = Cart::where('user_id', $userId)->sum('quantity');
+                
+                // Log cart removal
+                \Log::info('Item removed from cart', [
+                    'user_id' => $userId,
+                    'product_id' => $productId
+                ]);
+                
+                return response()->json(['success' => true, 'cart_count' => $cartCount]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Item not found in cart']);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to remove item from cart', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['success' => false, 'message' => 'Failed to remove item from cart. Please try again.']);
+        }
     }
 
     public function update(Request $request)
@@ -96,18 +160,30 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'product_id' => 'required|integer|exists:products,id',
+            'quantity' => 'required|integer|min:1|max:100'
+        ], [
+            'product_id.required' => 'Product ID is required',
+            'product_id.integer' => 'Invalid product ID',
+            'product_id.exists' => 'Product not found',
+            'quantity.required' => 'Quantity is required',
+            'quantity.integer' => 'Quantity must be a number',
+            'quantity.min' => 'Quantity must be at least 1',
+            'quantity.max' => 'Quantity cannot exceed 100'
         ]);
 
         $userId = session('auth.user_id');
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity');
+        $productId = (int) $request->input('product_id');
+        $quantity = (int) $request->input('quantity');
 
         // Get product details to check stock
         $product = Product::find($productId);
-        if (!$product || !$product->is_available) {
-            return response()->json(['success' => false, 'message' => 'Product not available']);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found']);
+        }
+
+        if (!$product->is_available) {
+            return response()->json(['success' => false, 'message' => 'Product is currently unavailable']);
         }
 
         // Check if quantity exceeds available stock
@@ -115,17 +191,37 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Not enough stock available. Only ' . $product->quantity . ' items in stock.']);
         }
 
-        $cartItem = Cart::where('user_id', $userId)
-                       ->where('product_id', $productId)
-                       ->first();
+        try {
+            $cartItem = Cart::where('user_id', $userId)
+                           ->where('product_id', $productId)
+                           ->first();
 
-        if ($cartItem) {
-            $cartItem->quantity = $quantity;
-            $cartItem->save();
+            if ($cartItem) {
+                $cartItem->quantity = $quantity;
+                $cartItem->save();
+                
+                $cartCount = Cart::where('user_id', $userId)->sum('quantity');
+                
+                // Log cart update
+                \Log::info('Cart item updated', [
+                    'user_id' => $userId,
+                    'product_id' => $productId,
+                    'quantity' => $quantity
+                ]);
+
+                return response()->json(['success' => true, 'cart_count' => $cartCount]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Item not found in cart']);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to update cart item', [
+                'user_id' => $userId,
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['success' => false, 'message' => 'Failed to update cart item. Please try again.']);
         }
-
-        $cartCount = Cart::where('user_id', $userId)->sum('quantity');
-
-        return response()->json(['success' => true, 'cart_count' => $cartCount]);
     }
 }

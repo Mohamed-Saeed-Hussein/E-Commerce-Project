@@ -36,7 +36,7 @@
         <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
             <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                 @if($product->image)
-                <img src="http://localhost:8000/{{ $product->image }}" 
+                <img src="{{ url($product->image) }}" 
                      alt="{{ $product->name }}" 
                      class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

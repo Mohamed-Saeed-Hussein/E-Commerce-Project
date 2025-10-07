@@ -45,6 +45,7 @@ class Order extends Model
             return null;
         }
 
+        // Calculate total amount
         $totalAmount = $cartItems->sum(function ($item) {
             return $item->quantity * $item->price;
         });
@@ -74,29 +75,34 @@ class Order extends Model
             $orderData['billing_country'] = $billingDetails['country'] ?? null;
         }
 
-        $order = self::create($orderData);
+        // Use database transaction to ensure data consistency
+        return \DB::transaction(function () use ($orderData, $cartItems) {
+            $order = self::create($orderData);
 
-        foreach ($cartItems as $cartItem) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $cartItem->product_id,
-                'product_name' => $cartItem->product->name,
-                'quantity' => $cartItem->quantity,
-                'price' => $cartItem->price
-            ]);
-            
-            // Reduce stock when order is created
-            $product = Product::find($cartItem->product_id);
-            if ($product) {
-                $product->quantity -= $cartItem->quantity;
-                $product->save();
+            foreach ($cartItems as $cartItem) {
+                // Double-check product availability before creating order item
+                $product = Product::find($cartItem->product_id);
+                if (!$product || !$product->is_available || $cartItem->quantity > $product->quantity) {
+                    throw new \Exception("Product {$cartItem->product_id} is no longer available or insufficient stock");
+                }
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cartItem->product_id,
+                    'product_name' => $cartItem->product->name,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->price
+                ]);
+                
+                // Reduce stock atomically
+                $product->reduceStock($cartItem->quantity);
             }
-        }
 
-        // Clear the cart
-        Cart::clearCart($userId);
+            // Clear the cart only after successful order creation
+            Cart::clearCart($orderData['user_id']);
 
-        return $order;
+            return $order;
+        });
     }
 
     /**
@@ -105,6 +111,18 @@ class Order extends Model
     public function updateStatus($newStatus)
     {
         $oldStatus = $this->status;
+        
+        // Validate status transition
+        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+        if (!in_array($newStatus, $validStatuses)) {
+            throw new \InvalidArgumentException("Invalid order status: {$newStatus}");
+        }
+
+        // Prevent invalid status transitions
+        if ($oldStatus === 'delivered' && $newStatus !== 'delivered') {
+            throw new \InvalidArgumentException("Cannot change status of delivered order");
+        }
+
         $this->status = $newStatus;
         $this->save();
 
@@ -118,6 +136,15 @@ class Order extends Model
                 $this->reduceStock();
             }
         }
+
+        // Log status change
+        \Log::info('Order status updated', [
+            'order_id' => $this->id,
+            'order_number' => $this->order_number,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'user_id' => $this->user_id
+        ]);
     }
 
     /**
@@ -128,8 +155,7 @@ class Order extends Model
         foreach ($this->items as $item) {
             $product = Product::find($item->product_id);
             if ($product) {
-                $product->quantity += $item->quantity;
-                $product->save();
+                $product->restoreStock($item->quantity);
             }
         }
     }
@@ -142,9 +168,32 @@ class Order extends Model
         foreach ($this->items as $item) {
             $product = Product::find($item->product_id);
             if ($product) {
-                $product->quantity -= $item->quantity;
-                $product->save();
+                $product->reduceStock($item->quantity);
             }
         }
+    }
+
+    /**
+     * Get formatted total amount
+     */
+    public function getFormattedTotalAttribute()
+    {
+        return '$' . number_format($this->total_amount, 2);
+    }
+
+    /**
+     * Scope to get orders by status
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to get orders for a specific user
+     */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 }

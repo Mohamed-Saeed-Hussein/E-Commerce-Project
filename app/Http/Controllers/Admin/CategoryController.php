@@ -20,6 +20,11 @@ class CategoryController extends Controller
         return view('admin.categories');
     }
 
+    public function create()
+    {
+        return view('admin.categories.create');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -32,6 +37,28 @@ class CategoryController extends Controller
         ]);
         
         return back()->with('status', 'Category added successfully!');
+    }
+
+    public function edit($id)
+    {
+        $category = Category::findOrFail($id);
+        return view('admin.categories.edit', ['category' => $category]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $category = Category::findOrFail($id);
+        
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+        ]);
+        
+        $category->update([
+            'name' => $request->input('name'),
+            'slug' => strtolower(str_replace(' ', '-', $request->input('name'))),
+        ]);
+        
+        return redirect('/admin/categories')->with('status', 'Category updated successfully!');
     }
 
     public function destroy($id)
