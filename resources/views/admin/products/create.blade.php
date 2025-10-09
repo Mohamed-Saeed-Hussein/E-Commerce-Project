@@ -33,7 +33,7 @@
 
         <!-- Form -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <form method="POST" action="{{ url('/admin/products') }}" class="max-w-2xl mx-auto space-y-6">
+            <form method="POST" action="{{ url('/admin/products') }}" enctype="multipart/form-data" class="max-w-2xl mx-auto space-y-6">
                 @csrf
                 
                 <!-- Category Selection -->
@@ -86,31 +86,26 @@
                     </div>
                 </div>
 
-                <!-- Image URL -->
+                <!-- Image Upload -->
                 <div>
-                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image URL (Optional)</label>
-                    <input type="url" name="image" id="image" value="{{ old('image') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="https://example.com/image.jpg">
+                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Product Image</label>
+                    <input type="file" name="image" id="image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload a JPEG, PNG, JPG, GIF, or WebP image (max 2MB)</p>
                     
                     <!-- Image Preview -->
                     <div id="image-preview-container" class="mt-4" style="display: none;">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Preview</label>
                         <div class="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
                             <img id="image-preview" src="" alt="Product preview" class="max-w-full h-64 object-contain mx-auto rounded-lg shadow-sm" style="display: none;">
-                            <div id="image-error" class="text-center text-red-600 dark:text-red-400 py-8" style="display: none;">
-                                <svg class="mx-auto h-12 w-12 text-red-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
-                                </svg>
-                                <p>Failed to load image. Please check the URL.</p>
-                            </div>
-                            <div id="image-loading" class="text-center text-gray-500 dark:text-gray-400 py-8" style="display: none;">
-                                <svg class="animate-spin mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <p>Loading image...</p>
-                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Image Alt Text -->
+                <div>
+                    <label for="image_alt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Alt Text (Optional)</label>
+                    <input type="text" name="image_alt" id="image_alt" value="{{ old('image_alt') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Describe the image for accessibility">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Alternative text for screen readers</p>
                 </div>
 
                 <!-- Action Buttons -->
@@ -132,111 +127,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('image');
     const previewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
-    const imageError = document.getElementById('image-error');
-    const imageLoading = document.getElementById('image-loading');
     
-    let debounceTimer;
-    
-    // Function to validate URL
-    function isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
-    
-    // Function to check if URL is an image
-    function isImageUrl(url) {
-        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
-        const lowerUrl = url.toLowerCase();
-        return imageExtensions.some(ext => lowerUrl.includes(ext)) || 
-               lowerUrl.includes('image') || 
-               lowerUrl.includes('photo') ||
-               lowerUrl.includes('img');
-    }
-    
-    // Function to load and preview image
-    function loadImagePreview(url) {
-        if (!url || !isValidUrl(url)) {
+    // Function to preview uploaded image
+    function previewImage(file) {
+        if (!file) {
             hidePreview();
             return;
         }
         
-        // Show loading state
-        showLoading();
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file.');
+            return;
+        }
         
-        // Create new image object to test loading
-        const testImage = new Image();
+        // Check file size (2MB limit)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Image file size must not exceed 2MB.');
+            return;
+        }
         
-        testImage.onload = function() {
-            // Image loaded successfully
-            imagePreview.src = url;
+        // Create FileReader to preview image
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
-            imageError.style.display = 'none';
-            imageLoading.style.display = 'none';
             previewContainer.style.display = 'block';
         };
         
-        testImage.onerror = function() {
-            // Image failed to load
-            imagePreview.style.display = 'none';
-            imageError.style.display = 'block';
-            imageLoading.style.display = 'none';
-            previewContainer.style.display = 'block';
-        };
-        
-        // Set timeout for loading
-        setTimeout(() => {
-            if (imageLoading.style.display !== 'none') {
-                testImage.onerror();
-            }
-        }, 10000); // 10 second timeout
-        
-        // Start loading the image
-        testImage.src = url;
-    }
-    
-    // Function to show loading state
-    function showLoading() {
-        imagePreview.style.display = 'none';
-        imageError.style.display = 'none';
-        imageLoading.style.display = 'block';
-        previewContainer.style.display = 'block';
+        reader.readAsDataURL(file);
     }
     
     // Function to hide preview
     function hidePreview() {
         previewContainer.style.display = 'none';
         imagePreview.style.display = 'none';
-        imageError.style.display = 'none';
-        imageLoading.style.display = 'none';
     }
     
-    // Event listener for image input
-    imageInput.addEventListener('input', function() {
-        const url = this.value.trim();
-        
-        // Clear previous timer
-        clearTimeout(debounceTimer);
-        
-        // Hide preview immediately if empty
-        if (!url) {
-            hidePreview();
-            return;
-        }
-        
-        // Debounce the image loading to avoid too many requests
-        debounceTimer = setTimeout(() => {
-            loadImagePreview(url);
-        }, 500); // 500ms delay
+    // Event listener for file input
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        previewImage(file);
     });
-    
-    // Load preview if there's already a value (for form validation errors)
-    if (imageInput.value.trim()) {
-        loadImagePreview(imageInput.value.trim());
-    }
 });
 </script>
 @endsection

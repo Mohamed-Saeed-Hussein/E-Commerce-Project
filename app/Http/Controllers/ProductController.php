@@ -10,7 +10,10 @@ class ProductController extends Controller
 {
     public function catalog(Request $request)
     {
-        $query = Product::where('is_available', true)->with('category');
+        // Explicitly exclude soft-deleted products
+        $query = Product::where('is_available', true)
+            ->whereNull('deleted_at')
+            ->with('category');
         
         // Filter by category if specified
         if ($request->has('category') && $request->category !== 'all') {

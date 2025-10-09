@@ -33,10 +33,16 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($defaultCategories as $categoryName) {
+            $slug = strtolower(str_replace(' ', '-', $categoryName));
             Category::firstOrCreate(
                 ['name' => $categoryName],
-                ['slug' => strtolower(str_replace(' ', '-', $categoryName))]
+                ['slug' => $slug]
             );
+            // Debug: Log category creation
+            \Log::info('Category created/updated', [
+                'name' => $categoryName,
+                'slug' => $slug
+            ]);
         }
 
         // Ensure only one admin user exists (admin@gmail.com / password: admin123!)
@@ -47,7 +53,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin123!'),
+            'password' => Hash::make('admin@gmail.com'),
             'role' => 'admin'
         ]);
         

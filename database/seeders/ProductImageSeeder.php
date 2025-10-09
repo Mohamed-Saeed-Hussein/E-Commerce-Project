@@ -67,7 +67,7 @@ class ProductImageSeeder extends Seeder
                     'description' => $this->generateDescription($productName, $categoryName),
                     'quantity' => rand(10, 100),
                     'is_available' => true,
-                    'image' => 'storage/products/' . $dirName . '/' . $fileName,
+                    'image' => 'products/' . $dirName . '/' . $fileName,
                     'category_id' => $category->id,
                 ]);
 
@@ -102,7 +102,7 @@ class ProductImageSeeder extends Seeder
                     'description' => $this->generateDescription($productName, $randomCategory->name),
                     'quantity' => rand(10, 100),
                     'is_available' => true,
-                    'image' => 'storage/products/all/' . $fileName,
+                    'image' => 'products/all/' . $fileName,
                     'category_id' => $randomCategory->id,
                 ]);
 

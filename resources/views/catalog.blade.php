@@ -34,10 +34,10 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($products as $product)
         <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
-            <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
-                @if($product->image)
-                <img src="{{ url($product->image) }}"
-                    alt="{{ $product->name }}"
+        <div class="w-full h-64 bg-white dark:bg-gray-700 relative overflow-hidden">
+        @if($product->image)
+                <img src="{{ $product->image_url }}"
+                    alt="{{ $product->image_alt_text }}"
                     class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-full h-full flex items-center justify-center" style="display: none;">
@@ -71,12 +71,12 @@
                 </div>
                 <div class="mt-auto pt-4 flex items-center space-x-2">
                     <div class="quantity-selector flex items-center border border-gray-300 dark:border-gray-600 rounded-md group-hover:border-primary-300 dark:group-hover:border-primary-600 transition-colors duration-300">
-                        <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation(); decreaseQuantity(this)">-</button>
-                        <input type="number" value="1" min="1" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white" readonly>
-                        <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation(); increaseQuantity(this)">+</button>
+                        <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation();">-</button>
+                        <input type="number" value="{{ $product->quantity > 0 ? 1 : 0 }}" min="{{ $product->quantity > 0 ? 1 : 0 }}" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white" readonly>
+                        <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation();">+</button>
                     </div>
                     <button class="btn-cart flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105"
-                        onclick="event.stopPropagation(); addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, this)">
+                        onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
                         Add to Cart
                     </button>
                 </div>
@@ -97,35 +97,30 @@
 </div>
 
 <script>
-    // Quantity selector functionality
+    // Quantity selector functionality (unified)
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.qty-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const input = this.parentElement.querySelector('.qty-input');
-                const currentValue = parseInt(input.value);
-                const maxValue = parseInt(input.getAttribute('max'));
-
-                if (this.classList.contains('plus') && currentValue < maxValue) {
-                    input.value = currentValue + 1;
-                } else if (this.classList.contains('minus') && currentValue > 1) {
-                    input.value = currentValue - 1;
+                const min = parseInt(input.getAttribute('min'));
+                const max = parseInt(input.getAttribute('max'));
+                let value = parseInt(input.value) || min;
+                if (this.classList.contains('plus')) {
+                    value = Math.min(max, value + 1);
+                } else if (this.classList.contains('minus')) {
+                    value = Math.max(min, value - 1);
                 }
+                input.value = isNaN(value) ? min : value;
             });
         });
     });
 
-    // Add to cart functionality
-    function addToCart(productId, productName, price, button) {
+    // Add to cart functionality (supports guests)
+    function addToCart(productId, button) {
         const quantityInput = button.parentElement.querySelector('.qty-input');
-        const quantity = parseInt(quantityInput.value);
+        const quantity = parseInt(quantityInput.value) || 0;
+        if (quantity <= 0) { return; }
 
-        // Check if user is logged in
-        @if(!session('auth.user_id'))
-        PopupMessage.error('Please log in to add items to cart');
-        return;
-        @endif
-
-        // Add to cart via AJAX
         fetch('{{ url("/cart/add") }}', {
                 method: 'POST',
                 headers: {
@@ -140,9 +135,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show success popup
-                    PopupMessage.success('Product added to cart!');
-
                     // Update button state
                     button.textContent = 'Added!';
                     button.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -156,16 +148,37 @@
 
                     // Update cart count if element exists
                     const cartCount = document.getElementById('cartCount');
-                    if (cartCount) {
+                    if (cartCount && typeof data.cart_count !== 'undefined') {
                         cartCount.textContent = data.cart_count;
                     }
+
+                    // Immediately update stock UI for this card
+                    if (typeof data.remaining_stock !== 'undefined') {
+                        const stockText = button.closest('.p-4').querySelector('span.text-sm');
+                        if (stockText) {
+                            stockText.textContent = `${data.remaining_stock} in stock`;
+                        }
+                        const qtyInput = button.parentElement.querySelector('.qty-input');
+                        if (qtyInput) {
+                            qtyInput.max = data.remaining_stock;
+                            const min = parseInt(qtyInput.getAttribute('min'));
+                            if (parseInt(qtyInput.value) > data.remaining_stock) {
+                                qtyInput.value = Math.max(min, data.remaining_stock);
+                            }
+                            if (data.remaining_stock <= 0) {
+                                button.setAttribute('disabled', 'disabled');
+                                qtyInput.value = 0;
+                                qtyInput.setAttribute('min', 0);
+                            }
+                        }
+                    }
                 } else {
-                    PopupMessage.error(data.message || 'Error adding product to cart');
+                    alert(data.message || 'Error adding product to cart');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                PopupMessage.error('Error adding product to cart');
+                alert('Error adding product to cart');
             });
     }
 

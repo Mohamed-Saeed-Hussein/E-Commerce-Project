@@ -233,8 +233,7 @@
         @yield('content')
     </main>
 
-    <!-- Popup Message System -->
-    @include('partials.popup-message')
+    <!-- Popup Message System removed -->
 
         <!-- Footer -->
         <footer class="p-4 bg-white md:p-8 lg:p-10 dark:bg-gray-800">
@@ -417,7 +416,7 @@
         });
 
         // Load cart count on page load
-        @if(session('auth.user_id'))
+        // Load cart count on page load (works for guests and logged-in users)
         fetch('{{ url("/cart/count") }}', {
             method: 'GET',
             headers: {
@@ -426,7 +425,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data && typeof data.count !== 'undefined') {
                 const cartCount = document.getElementById('cartCount');
                 if (cartCount) {
                     cartCount.textContent = data.count;
@@ -436,7 +435,6 @@
         .catch(error => {
             console.error('Error loading cart count:', error);
         });
-        @endif
 
     </script>
 </body>

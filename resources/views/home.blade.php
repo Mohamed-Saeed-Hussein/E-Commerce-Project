@@ -16,7 +16,7 @@
                 </h1>
                 <p class="mt-6 max-w-3xl text-xl text-primary-100">
                     Style Haven is a thoughtfully curated destination for modern fashion and lifestyle essentials.
-                    We champion timeless design, responsible sourcing, and a seamless customer experience—so you can shop
+                    We champion timeless design, responsible sourcing, and a seamless customer experience — so you can shop
                     with confidence and wear with pride.
                 </p>
                 <div class="mt-10">
@@ -154,19 +154,37 @@
 
 	<!-- Assortment Snapshot -->
 	<div class="py-16 bg-white dark:bg-gray-800">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white text-center">What You’ll Find</h2>
-			<p class="mt-3 max-w-3xl mx-auto text-center text-gray-600 dark:text-gray-300">A versatile assortment for workdays, weekends, and everything between.</p>
-			<div class="mt-8 flex flex-wrap gap-3 justify-center">
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Everyday Basics</span>
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Elevated Essentials</span>
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Seasonal Layers</span>
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Occasionwear</span>
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Accessories</span>
-				<span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm">Limited Drops</span>
-			</div>
-		</div>
-	</div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white text-center">
+      What You’ll Find
+    </h2>
+    <p class="mt-3 max-w-3xl mx-auto text-center text-gray-600 dark:text-gray-300">
+      A versatile assortment for workdays, weekends, and everything between.
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-3 justify-center">
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Everyday Basics
+      </span>
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Elevated Essentials
+      </span>
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Seasonal Layers
+      </span>
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Occasionwear
+      </span>
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Accessories
+      </span>
+      <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium">
+        Limited Drops
+      </span>
+    </div>
+  </div>
+</div>
+
 
 	<!-- Testimonials -->
 	<div class="py-16 bg-gray-50 dark:bg-gray-900">

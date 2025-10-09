@@ -83,6 +83,24 @@ class AuthController extends Controller
         $request->session()->put('auth.role', $user->role);
         $request->session()->put('auth.last_activity', time());
 
+        // Merge guest cart into user cart on login
+        try {
+            $guestCart = $request->session()->get('guest_cart', []);
+            if (!empty($guestCart)) {
+                foreach ($guestCart as $item) {
+                    $pid = (int)($item['product_id'] ?? 0);
+                    $qty = (int)($item['quantity'] ?? 0);
+                    if ($pid > 0 && $qty > 0) {
+                        // No stock change on merge here (stock already reserved at add time)
+                        \App\Models\Cart::addToCart($user->id, $pid, $qty, (float)($item['price'] ?? 0));
+                    }
+                }
+                $request->session()->forget('guest_cart');
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Failed merging guest cart', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
+
         // Log successful login
         \Log::info('Successful login', [
             'user_id' => $user->id,

@@ -56,8 +56,7 @@
         </main>
     </div>
 
-    <!-- Flowbite JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <!-- External Flowbite JS removed to comply with CSP -->
     
     <script>
         // Auth pages: toggle password visibility

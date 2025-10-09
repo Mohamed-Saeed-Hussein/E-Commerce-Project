@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
@@ -83,8 +84,27 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         
+        // Prevent admin from deleting themselves
+        if ($user->id === session('auth.user_id')) {
+            return redirect('/admin/users')->with('error', 'You cannot delete your own account!');
+        }
+        
         // Set user_id to null for all orders to preserve transaction data
         \App\Models\Order::where('user_id', $user->id)->update(['user_id' => null]);
+        
+        // Clear any remember me tokens
+        if ($user->remember_token) {
+            $user->remember_token = null;
+            $user->save();
+        }
+        
+        // Log the deletion
+        \Log::info('User deleted by admin', [
+            'deleted_user_id' => $user->id,
+            'deleted_user_email' => $user->email,
+            'admin_user_id' => session('auth.user_id'),
+            'timestamp' => now()
+        ]);
         
         $user->delete();
         

@@ -38,9 +38,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Product Image -->
             <div class="space-y-4">
-                <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-4 min-h-96">
-                    @if($product->image)
-                    <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
+            <div class="bg-white dark:bg-white rounded-lg overflow-hidden flex items-center justify-center p-4 min-h-96">
+            @if($product->image)
+                    <img src="{{ $product->image_url }}" alt="{{ $product->image_alt_text }}" class="max-w-full max-h-full object-contain">
                     @else
                     <div class="w-full h-96 flex items-center justify-center">
                         <svg class="h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,15 +74,15 @@
                         <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
                         <div class="mt-1">
                             <div class="quantity-selector flex items-center border border-gray-300 dark:border-gray-600 rounded-md group-hover:border-primary-300 dark:group-hover:border-primary-600 transition-colors duration-300">
-                                <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="decreaseQuantity()">-</button>
-                                <input type="number" id="quantity" value="1" min="1" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white">
-                                <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="increaseQuantity()">+</button>
+                                <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button">-</button>
+                                <input type="number" id="quantity" value="{{ $product->quantity > 0 ? 1 : 0 }}" min="{{ $product->quantity > 0 ? 1 : 0 }}" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white">
+                                <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button">+</button>
                             </div>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $product->quantity }} available</p>
                         </div>
                     </div>
 
-                    <button id="addToCartBtn" onclick="addToCart()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 font-medium">
+                    <button id="addToCartBtn" onclick="addToCart()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 font-medium" {{ $product->quantity <= 0 ? 'disabled' : '' }}>
                         Add to Cart
                     </button>
                 </div>
@@ -100,9 +100,9 @@
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 @forelse($similarProducts as $similarProduct)
                 <div class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 scroll-animate cursor-pointer" onclick="window.location.href='{{ url('/product/' . $similarProduct->id) }}'">
-                    <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
-                        @if($similarProduct->image)
-                        <img src="{{ url($similarProduct->image) }}" alt="{{ $similarProduct->name }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
+                <div class="w-full h-64 bg-white dark:bg-white relative overflow-hidden">
+                @if($similarProduct->image)
+                        <img src="{{ $similarProduct->image_url }}" alt="{{ $similarProduct->image_alt_text }}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         @else
                         <div class="w-full h-64 flex items-center justify-center group-hover:bg-gray-100 dark:group-hover:bg-gray-500 transition-colors duration-300">
                             <svg class="h-12 w-12 text-gray-400 group-hover:text-gray-500 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,37 +144,26 @@
 </div>
 
 <script>
-    function decreaseQuantity() {
-        const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-            quantityInput.value = currentValue - 1;
+    // Unified qty control
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.qty-btn');
+        if (!btn) return;
+        const input = document.getElementById('quantity');
+        const min = parseInt(input.min);
+        const max = parseInt(input.max);
+        let value = parseInt(input.value) || min;
+        if (btn.classList.contains('plus')) {
+            value = Math.min(max, value + 1);
+        } else if (btn.classList.contains('minus')) {
+            value = Math.max(min, value - 1);
         }
-    }
-
-    function increaseQuantity() {
-        const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value);
-        const maxValue = parseInt(quantityInput.max);
-        if (currentValue < maxValue) {
-            quantityInput.value = currentValue + 1;
-        }
-    }
+        input.value = isNaN(value) ? min : value;
+    });
 
     function addToCart() {
         const quantity = document.getElementById('quantity').value;
-        const productId = {
-            {
-                $product - > id
-            }
-        };
+        const productId = {{ $product->id }};
         const button = document.getElementById('addToCartBtn');
-
-        // Check if user is logged in
-        @if(!session('auth.user_id'))
-        PopupMessage.error('Please log in to add items to cart');
-        return;
-        @endif
 
         // Disable button and show loading state
         button.disabled = true;
@@ -196,8 +185,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show success popup
-                    PopupMessage.success('Product added to cart!');
 
                     // Update button state with animations
                     button.textContent = 'Added!';
@@ -215,15 +202,36 @@
 
                     // Update cart count if element exists
                     const cartCount = document.getElementById('cartCount');
-                    if (cartCount) {
+                    if (cartCount && typeof data.cart_count !== 'undefined') {
                         cartCount.textContent = data.cart_count;
+                    }
+
+                    // Immediately update remaining stock UI
+                    if (typeof data.remaining_stock !== 'undefined') {
+                        const stockText = document.querySelector('p.mt-1.text-sm');
+                        if (stockText) {
+                            stockText.textContent = `${data.remaining_stock} available`;
+                        }
+                        const qtyInput = document.getElementById('quantity');
+                        if (qtyInput) {
+                            qtyInput.max = data.remaining_stock;
+                            const min = parseInt(qtyInput.min);
+                            if (parseInt(qtyInput.value) > data.remaining_stock) {
+                                qtyInput.value = Math.max(min, data.remaining_stock);
+                            }
+                            if (data.remaining_stock <= 0) {
+                                document.getElementById('addToCartBtn').setAttribute('disabled', 'disabled');
+                                qtyInput.value = 0;
+                                qtyInput.min = 0;
+                            }
+                        }
                     }
                 } else {
                     // Reset button on error
                     button.textContent = 'Add to Cart';
                     button.classList.remove('opacity-75', 'cursor-not-allowed');
                     button.disabled = false;
-                    PopupMessage.error(data.message || 'Error adding product to cart');
+                    alert(data.message || 'Error adding product to cart');
                 }
             })
             .catch(error => {
@@ -232,7 +240,7 @@
                 button.textContent = 'Add to Cart';
                 button.classList.remove('opacity-75', 'cursor-not-allowed');
                 button.disabled = false;
-                PopupMessage.error('Error adding product to cart');
+                alert('Error adding product to cart');
             });
     }
 </script>

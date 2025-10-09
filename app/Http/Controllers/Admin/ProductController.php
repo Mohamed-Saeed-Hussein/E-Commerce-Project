@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -14,6 +15,40 @@ class ProductController extends Controller
     public function __construct()
     {
         // Admin middleware will be applied via routes
+    }
+
+    /**
+     * Handle image upload and return the storage path.
+     */
+    private function handleImageUpload($request, $product = null)
+    {
+        if (!$request->hasFile('image')) {
+            return $product ? $product->image : null;
+        }
+
+        $file = $request->file('image');
+        $categoryName = 'general';
+        
+        // Get category name for folder organization
+        if ($request->filled('category_id')) {
+            $category = Category::find($request->category_id);
+            if ($category) {
+                $categoryName = Str::slug($category->name);
+            }
+        }
+
+        // Generate unique filename
+        $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+        
+        // Store in products/{category} folder
+        $path = $file->storeAs("products/{$categoryName}", $filename, 'public');
+        
+        // Delete old image if updating
+        if ($product && $product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        
+        return $path;
     }
 
     public function index()
@@ -42,20 +77,26 @@ class ProductController extends Controller
             'quantity.required' => 'Quantity is required',
             'quantity.min' => 'Quantity must be at least 0',
             'quantity.max' => 'Quantity is too high',
-            'image.url' => 'Image must be a valid URL',
-            'image.max' => 'Image URL is too long',
+            'image.file' => 'Image must be a valid file',
+            'image.mimes' => 'Image must be a jpeg, png, jpg, gif, or webp file',
+            'image.max' => 'Image file size must not exceed 2MB',
+            'image_alt.max' => 'Image alt text is too long',
             'category_id.exists' => 'Selected category does not exist',
         ]);
         
         try {
-            Product::create($request->only([
+            $imagePath = $this->handleImageUpload($request);
+            
+            Product::create(array_merge($request->only([
                 'name',
                 'price',
                 'description',
                 'quantity',
                 'is_available',
-                'image',
+                'image_alt',
                 'category_id',
+            ]), [
+                'image' => $imagePath
             ]));
             
             \Log::info('Product created', [
@@ -96,8 +137,10 @@ class ProductController extends Controller
             'quantity.required' => 'Quantity is required',
             'quantity.min' => 'Quantity must be at least 0',
             'quantity.max' => 'Quantity is too high',
-            'image.url' => 'Image must be a valid URL',
-            'image.max' => 'Image URL is too long',
+            'image.file' => 'Image must be a valid file',
+            'image.mimes' => 'Image must be a jpeg, png, jpg, gif, or webp file',
+            'image.max' => 'Image file size must not exceed 2MB',
+            'image_alt.max' => 'Image alt text is too long',
             'category_id.exists' => 'Selected category does not exist',
         ]);
         
@@ -105,14 +148,18 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
             $oldData = $product->toArray();
             
-            $product->update($request->only([
+            $imagePath = $this->handleImageUpload($request, $product);
+            
+            $product->update(array_merge($request->only([
                 'name',
                 'price',
                 'description',
                 'quantity',
                 'is_available',
-                'image',
+                'image_alt',
                 'category_id',
+            ]), [
+                'image' => $imagePath
             ]));
             
             \Log::info('Product updated', [
@@ -140,12 +187,10 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
             $productData = $product->toArray();
             
-            // Check if product has orders
-            $hasOrders = $product->orderItems()->exists();
-            if ($hasOrders) {
-                return redirect('/admin/products')->with('error', 'Cannot delete product that has been ordered. Consider marking it as unavailable instead.');
-            }
-            
+            // Remove from any active carts to avoid stale references
+            $product->cartItems()->delete();
+
+            // Soft delete the product to preserve order history
             $product->delete();
             
             \Log::info('Product deleted', [

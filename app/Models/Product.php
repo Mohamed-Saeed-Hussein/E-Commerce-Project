@@ -16,6 +16,7 @@ class Product extends Model
         'quantity',
         'is_available',
         'image',
+        'image_alt',
         'category_id',
     ];
 
@@ -36,7 +37,8 @@ class Product extends Model
             'description' => 'required|string|min:10|max:2000',
             'quantity' => 'required|integer|min:0|max:999999',
             'is_available' => 'required|boolean',
-            'image' => 'nullable|url|max:500',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_alt' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
         ];
     }
@@ -140,11 +142,48 @@ class Product extends Model
     }
 
     /**
-     * Restore stock quantity.
+     * Get the full URL for the product image.
      */
-    public function restoreStock($quantity)
+    public function getImageUrlAttribute()
     {
-        $this->quantity += $quantity;
-        $this->save();
+        if (!$this->image) {
+            return null;
+        }
+        
+        // If it's already a full URL, return as is
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+        
+        // For local storage, return the storage URL
+        return asset('storage/' . $this->image);
+    }
+
+    /**
+     * Get the image path for storage.
+     */
+    public function getImagePathAttribute()
+    {
+        if (!$this->image) {
+            return null;
+        }
+        
+        return storage_path('app/public/' . $this->image);
+    }
+
+    /**
+     * Check if the image exists in storage.
+     */
+    public function hasImage()
+    {
+        return $this->image && file_exists($this->image_path);
+    }
+
+    /**
+     * Get image alt text or fallback to product name.
+     */
+    public function getImageAltTextAttribute()
+    {
+        return $this->image_alt ?: $this->name;
     }
 }
