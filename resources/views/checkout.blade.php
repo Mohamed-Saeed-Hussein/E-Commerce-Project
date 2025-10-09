@@ -174,6 +174,7 @@
     </div>
 </div>
 
+<script src="{{ url('/script.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Handle same as shipping checkbox
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             if (!fullName || !emailOk || !address || !city || !postalCode || !country || !phone) {
-                PopupMessage.error('Please fill out all fields correctly.');
+                showError('Please fill out all fields correctly.');
                 return;
             }
 
@@ -269,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                PopupMessage.error('There was an error processing your order. Please try again.');
+                showError('There was an error processing your order. Please try again.');
             });
         });
     }

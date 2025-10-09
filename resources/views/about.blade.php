@@ -16,12 +16,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 hover:shadow-xl hover:scale-105 transition-all duration-300 group">
                 <h2 class="text-3xl font-semibold text-gray-900 dark:text-white mb-6 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">Our Story</h2>
                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-                    Style Haven was born from a simple yet powerful vision: to make high-quality, trendy fashion accessible to everyone. 
-                    Founded in 2019, we started as a small online boutique with a curated selection of carefully chosen pieces. 
+                    Style Haven was born from a simple yet powerful vision: to make high-quality, trendy fashion accessible to everyone.
+                    Founded in 2019, we started as a small online boutique with a curated selection of carefully chosen pieces.
                     Today, we've grown into a comprehensive fashion platform that serves thousands of customers worldwide.
                 </p>
                 <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-                    Our journey began when our founders noticed a gap in the market for affordable, stylish clothing that doesn't compromise on quality. 
+                    Our journey began when our founders noticed a gap in the market for affordable, stylish clothing that doesn't compromise on quality.
                     We set out to bridge that gap, creating a shopping experience that combines the latest trends with exceptional value and outstanding customer service.
                 </p>
             </div>
@@ -85,7 +85,7 @@
                         <p class="text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">Handpicked pieces that represent the latest trends and timeless classics</p>
                     </div>
                 </div>
-                
+
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 hover:shadow-xl hover:scale-105 transition-all duration-300 group scroll-animate">
                     <div class="text-center">
                         <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50 transition-colors duration-300 group-hover:scale-110 transition-transform duration-300">
@@ -97,7 +97,7 @@
                         <p class="text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">Quality fashion at prices that won't break the bank</p>
                     </div>
                 </div>
-                
+
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 hover:shadow-xl hover:scale-105 transition-all duration-300 group scroll-animate">
                     <div class="text-center">
                         <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50 transition-colors duration-300 group-hover:scale-110 transition-transform duration-300">
@@ -210,250 +210,250 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Enhanced scroll-triggered animations with intersection observer
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced scroll-triggered animations with intersection observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate');
-                // Add staggered animation for child elements
-                const children = entry.target.querySelectorAll('.scroll-animate');
-                children.forEach((child, index) => {
-                    setTimeout(() => {
-                        child.classList.add('animate');
-                    }, index * 150);
-                });
-            } else {
-                // Keep animations running - don't remove animate class
-                // This ensures animations persist while on the page
-            }
-        });
-    }, observerOptions);
-
-    // Observe all scroll-animate elements
-    document.querySelectorAll('.scroll-animate').forEach(el => {
-        observer.observe(el);
-    });
-
-    // Add smooth scroll behavior
-    document.documentElement.style.scrollBehavior = 'smooth';
-
-    // Continuous animation loop for persistent effects
-    function continuousAnimations() {
-        document.querySelectorAll('.scroll-animate').forEach((el, index) => {
-            // Add subtle continuous animation
-            setTimeout(() => {
-                if (el.classList.contains('animate')) {
-                    el.style.animation = `fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                    // Add staggered animation for child elements
+                    const children = entry.target.querySelectorAll('.scroll-animate');
+                    children.forEach((child, index) => {
+                        setTimeout(() => {
+                            child.classList.add('animate');
+                        }, index * 150);
+                    });
+                } else {
+                    // Keep animations running - don't remove animate class
+                    // This ensures animations persist while on the page
                 }
-            }, index * 200);
+            });
+        }, observerOptions);
+
+        // Observe all scroll-animate elements
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
         });
-    }
 
-    // Run continuous animations every 3 seconds
-    setInterval(continuousAnimations, 3000);
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
 
-    // Position-based scroll animations
-    let ticking = false;
-
-    function updateScrollPosition() {
-        document.querySelectorAll('.scroll-animate').forEach((el, index) => {
-            const rect = el.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            
-            // Calculate visibility percentage based on scroll position
-            const elementTop = rect.top;
-            const elementHeight = rect.height;
-            const elementCenter = elementTop + (elementHeight / 2);
-            const windowCenter = windowHeight / 2;
-            
-            // Calculate distance from center of viewport
-            const distanceFromCenter = Math.abs(elementCenter - windowCenter);
-            const maxDistance = windowHeight / 2 + elementHeight / 2;
-            
-            // Calculate opacity and transform based on position
-            const visibilityRatio = Math.max(0, 1 - (distanceFromCenter / maxDistance));
-            const opacity = Math.max(0.1, visibilityRatio);
-            const translateY = (1 - visibilityRatio) * 50;
-            const scale = 0.8 + (visibilityRatio * 0.2);
-            
-            // Apply position-based styles
-            el.style.opacity = opacity;
-            el.style.transform = `translateY(${translateY}px) scale(${scale})`;
-            
-            // Add animate class when element is in view
-            if (rect.top < windowHeight && rect.bottom > 0) {
-                el.classList.add('animate');
-            } else {
-                el.classList.remove('animate');
-            }
-        });
-        
-        ticking = false;
-    }
-
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(updateScrollPosition);
-            ticking = true;
+        // Continuous animation loop for persistent effects
+        function continuousAnimations() {
+            document.querySelectorAll('.scroll-animate').forEach((el, index) => {
+                // Add subtle continuous animation
+                setTimeout(() => {
+                    if (el.classList.contains('animate')) {
+                        el.style.animation = `fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+                    }
+                }, index * 200);
+            });
         }
-    }
 
-    window.addEventListener('scroll', requestTick);
-});
+        // Run continuous animations every 3 seconds
+        setInterval(continuousAnimations, 3000);
+
+        // Position-based scroll animations
+        let ticking = false;
+
+        function updateScrollPosition() {
+            document.querySelectorAll('.scroll-animate').forEach((el, index) => {
+                const rect = el.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+
+                // Calculate visibility percentage based on scroll position
+                const elementTop = rect.top;
+                const elementHeight = rect.height;
+                const elementCenter = elementTop + (elementHeight / 2);
+                const windowCenter = windowHeight / 2;
+
+                // Calculate distance from center of viewport
+                const distanceFromCenter = Math.abs(elementCenter - windowCenter);
+                const maxDistance = windowHeight / 2 + elementHeight / 2;
+
+                // Calculate opacity and transform based on position
+                const visibilityRatio = Math.max(0, 1 - (distanceFromCenter / maxDistance));
+                const opacity = Math.max(0.1, visibilityRatio);
+                const translateY = (1 - visibilityRatio) * 50;
+                const scale = 0.8 + (visibilityRatio * 0.2);
+
+                // Apply position-based styles
+                el.style.opacity = opacity;
+                el.style.transform = `translateY(${translateY}px) scale(${scale})`;
+
+                // Add animate class when element is in view
+                if (rect.top < windowHeight && rect.bottom > 0) {
+                    el.classList.add('animate');
+                } else {
+                    el.classList.remove('animate');
+                }
+            });
+
+            ticking = false;
+        }
+
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(updateScrollPosition);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+    });
 </script>
 
 <style>
-/* Enhanced scroll animations */
-.scroll-animate {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.scroll-animate.animate {
-    opacity: 1;
-    transform: translateY(0);
-    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.animate-fade-in-up {
-    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes fadeInUp {
-    0% {
+    /* Enhanced scroll animations */
+    .scroll-animate {
         opacity: 0;
         transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    50% {
-        opacity: 0.7;
-        transform: translateY(15px);
-    }
-    100% {
+
+    .scroll-animate.animate {
         opacity: 1;
         transform: translateY(0);
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
-}
 
-/* Position-based scroll animations */
-.scroll-animate {
-    opacity: 0.1;
-    transform: translateY(50px) scale(0.8);
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-}
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
 
-.scroll-animate.animate {
-    /* Animation properties are now controlled by JavaScript based on scroll position */
-}
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
 
-/* Enhanced hover effects */
-.group:hover .group-hover\:scale-110 {
-    transform: scale(1.1);
-}
+        50% {
+            opacity: 0.7;
+            transform: translateY(15px);
+        }
 
-.group:hover .group-hover\:translate-x-1 {
-    transform: translateX(0.25rem);
-}
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-/* Individual card animations for "What We Offer" */
-.scroll-animate:nth-child(1) {
-    animation-delay: 0.1s;
-}
+    /* Position-based scroll animations */
+    .scroll-animate {
+        opacity: 0.1;
+        transform: translateY(50px) scale(0.8);
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
 
-.scroll-animate:nth-child(2) {
-    animation-delay: 0.3s;
-}
+    .scroll-animate.animate {
+        /* Animation properties are now controlled by JavaScript based on scroll position */
+    }
 
-.scroll-animate:nth-child(3) {
-    animation-delay: 0.5s;
-}
+    /* Enhanced hover effects */
+    .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
+    }
 
-.scroll-animate:nth-child(4) {
-    animation-delay: 0.7s;
-}
+    .group:hover .group-hover\:translate-x-1 {
+        transform: translateX(0.25rem);
+    }
 
-.scroll-animate:nth-child(5) {
-    animation-delay: 0.9s;
-}
+    /* Individual card animations for "What We Offer" */
+    .scroll-animate:nth-child(1) {
+        animation-delay: 0.1s;
+    }
 
-.scroll-animate:nth-child(6) {
-    animation-delay: 1.1s;
-}
+    .scroll-animate:nth-child(2) {
+        animation-delay: 0.3s;
+    }
 
-/* Consistent card sizing for comfortable visual appearance */
-.grid .scroll-animate {
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-}
+    .scroll-animate:nth-child(3) {
+        animation-delay: 0.5s;
+    }
 
-.grid .scroll-animate .text-center {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem;
-}
+    .scroll-animate:nth-child(4) {
+        animation-delay: 0.7s;
+    }
 
-.grid .scroll-animate h3 {
-    min-height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
+    .scroll-animate:nth-child(5) {
+        animation-delay: 0.9s;
+    }
 
-.grid .scroll-animate p {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
+    .scroll-animate:nth-child(6) {
+        animation-delay: 1.1s;
+    }
 
-/* Ensure equal height for all cards in grid */
-.grid {
-    align-items: stretch;
-}
+    /* Consistent card sizing for comfortable visual appearance */
+    .grid .scroll-animate {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+    }
 
-.grid > * {
-    height: 100%;
-}
+    .grid .scroll-animate .text-center {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem;
+    }
 
-/* Icon container sizing */
-.grid .scroll-animate .w-16 {
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 1.5rem;
-}
+    .grid .scroll-animate h3 {
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
 
-/* Smooth transitions for all interactive elements */
-* {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-}
+    .grid .scroll-animate p {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
 
-/* Enhanced card hover effects */
-.group:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+    /* Ensure equal height for all cards in grid */
+    .grid {
+        align-items: stretch;
+    }
 
-.dark .group:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-}
+    .grid>* {
+        height: 100%;
+    }
+
+    /* Icon container sizing */
+    .grid .scroll-animate .w-16 {
+        width: 4rem;
+        height: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+
+    /* Enhanced card hover effects */
+    .group:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .dark .group:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
 </style>
 @endsection
-
-

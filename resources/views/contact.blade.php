@@ -6,7 +6,8 @@
 @if(session('success'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        PopupMessage.success('{{ session('success') }}');
+        PopupMessage.success('{{ session('
+            success ') }}');
     });
 </script>
 @endif
@@ -58,7 +59,7 @@
         <div class="max-w-2xl mx-auto mb-16 scroll-animate">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 hover:scale-105">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Get in Touch</h2>
-                
+
                 <div class="space-y-6">
                     <!-- Address -->
                     <div class="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 group">
@@ -132,71 +133,73 @@
 </div>
 
 <style>
-/* Enhanced scroll animations */
-.scroll-animate {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.scroll-animate.animate {
-    opacity: 1;
-    transform: translateY(0);
-    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.animate-fade-in-up {
-    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes fadeInUp {
-    0% {
+    /* Enhanced scroll animations */
+    .scroll-animate {
         opacity: 0;
         transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    50% {
-        opacity: 0.7;
-        transform: translateY(15px);
-    }
-    100% {
+
+    .scroll-animate.animate {
         opacity: 1;
         transform: translateY(0);
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
-}
 
-/* Enhanced hover effects */
-.group:hover .group-hover\:scale-110 {
-    transform: scale(1.1);
-}
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
 
-/* Smooth transitions for all interactive elements */
-* {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
-}
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: translateY(15px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Enhanced hover effects */
+    .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
+    }
+
+    /* Smooth transitions for all interactive elements */
+    * {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Enhanced scroll-triggered animations with intersection observer
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced scroll-triggered animations with intersection observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate');
-            }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all scroll-animate elements
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
         });
-    }, observerOptions);
-
-    // Observe all scroll-animate elements
-    document.querySelectorAll('.scroll-animate').forEach(el => {
-        observer.observe(el);
     });
-});
 </script>
 @endsection

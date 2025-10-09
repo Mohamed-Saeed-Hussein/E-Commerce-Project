@@ -25,6 +25,22 @@ class Product extends Model
         'quantity' => 'integer',
     ];
 
+    /**
+     * Validation rules for creating/updating products.
+     */
+    public static function validationRules()
+    {
+        return [
+            'name' => 'required|string|max:255|min:2',
+            'price' => 'required|numeric|min:0|max:999999.99',
+            'description' => 'required|string|min:10|max:2000',
+            'quantity' => 'required|integer|min:0|max:999999',
+            'is_available' => 'required|boolean',
+            'image' => 'nullable|url|max:500',
+            'category_id' => 'nullable|exists:categories,id',
+        ];
+    }
+
     protected $dates = ['deleted_at'];
 
     /**
@@ -92,6 +108,22 @@ class Product extends Model
     public function getFormattedPriceAttribute()
     {
         return '$' . number_format($this->price, 2);
+    }
+
+    /**
+     * Scope to get products with images.
+     */
+    public function scopeWithImages($query)
+    {
+        return $query->whereNotNull('image');
+    }
+
+    /**
+     * Scope to get products by price range.
+     */
+    public function scopeByPriceRange($query, $min, $max)
+    {
+        return $query->whereBetween('price', [$min, $max]);
     }
 
     /**

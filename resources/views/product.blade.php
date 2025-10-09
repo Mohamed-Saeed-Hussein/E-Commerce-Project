@@ -144,92 +144,96 @@
 </div>
 
 <script>
-function decreaseQuantity() {
-    const quantityInput = document.getElementById('quantity');
-    const currentValue = parseInt(quantityInput.value);
-    if (currentValue > 1) {
-        quantityInput.value = currentValue - 1;
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
     }
-}
 
-function increaseQuantity() {
-    const quantityInput = document.getElementById('quantity');
-    const currentValue = parseInt(quantityInput.value);
-    const maxValue = parseInt(quantityInput.max);
-    if (currentValue < maxValue) {
-        quantityInput.value = currentValue + 1;
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const currentValue = parseInt(quantityInput.value);
+        const maxValue = parseInt(quantityInput.max);
+        if (currentValue < maxValue) {
+            quantityInput.value = currentValue + 1;
+        }
     }
-}
 
-function addToCart() {
-    const quantity = document.getElementById('quantity').value;
-    const productId = {{ $product->id }};
-    const button = document.getElementById('addToCartBtn');
-    
-    // Check if user is logged in
-    @if(!session('auth.user_id'))
+    function addToCart() {
+        const quantity = document.getElementById('quantity').value;
+        const productId = {
+            {
+                $product - > id
+            }
+        };
+        const button = document.getElementById('addToCartBtn');
+
+        // Check if user is logged in
+        @if(!session('auth.user_id'))
         PopupMessage.error('Please log in to add items to cart');
         return;
-    @endif
-    
-    // Disable button and show loading state
-    button.disabled = true;
-    button.textContent = 'Adding...';
-    button.classList.add('opacity-75', 'cursor-not-allowed');
-    
-    // Add to cart via AJAX
-    fetch('{{ url("/cart/add") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            product_id: productId,
-            quantity: parseInt(quantity)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success popup
-            PopupMessage.success('Product added to cart!');
-            
-            // Update button state with animations
-            button.textContent = 'Added!';
-            button.classList.add('bg-green-600', 'hover:bg-green-700');
-            button.classList.remove('bg-primary-600', 'hover:bg-primary-700', 'opacity-75', 'cursor-not-allowed');
-            button.classList.add('transform', 'scale-105');
-            
-            // Reset button after 2 seconds
-            setTimeout(() => {
+        @endif
+
+        // Disable button and show loading state
+        button.disabled = true;
+        button.textContent = 'Adding...';
+        button.classList.add('opacity-75', 'cursor-not-allowed');
+
+        // Add to cart via AJAX
+        fetch('{{ url("/cart/add") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: parseInt(quantity)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success popup
+                    PopupMessage.success('Product added to cart!');
+
+                    // Update button state with animations
+                    button.textContent = 'Added!';
+                    button.classList.add('bg-green-600', 'hover:bg-green-700');
+                    button.classList.remove('bg-primary-600', 'hover:bg-primary-700', 'opacity-75', 'cursor-not-allowed');
+                    button.classList.add('transform', 'scale-105');
+
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.textContent = 'Add to Cart';
+                        button.classList.remove('bg-green-600', 'hover:bg-green-700', 'transform', 'scale-105');
+                        button.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                        button.disabled = false;
+                    }, 2000);
+
+                    // Update cart count if element exists
+                    const cartCount = document.getElementById('cartCount');
+                    if (cartCount) {
+                        cartCount.textContent = data.cart_count;
+                    }
+                } else {
+                    // Reset button on error
+                    button.textContent = 'Add to Cart';
+                    button.classList.remove('opacity-75', 'cursor-not-allowed');
+                    button.disabled = false;
+                    PopupMessage.error(data.message || 'Error adding product to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Reset button on error
                 button.textContent = 'Add to Cart';
-                button.classList.remove('bg-green-600', 'hover:bg-green-700', 'transform', 'scale-105');
-                button.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                button.classList.remove('opacity-75', 'cursor-not-allowed');
                 button.disabled = false;
-            }, 2000);
-            
-            // Update cart count if element exists
-            const cartCount = document.getElementById('cartCount');
-            if (cartCount) {
-                cartCount.textContent = data.cart_count;
-            }
-        } else {
-            // Reset button on error
-            button.textContent = 'Add to Cart';
-            button.classList.remove('opacity-75', 'cursor-not-allowed');
-            button.disabled = false;
-            PopupMessage.error(data.message || 'Error adding product to cart');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Reset button on error
-        button.textContent = 'Add to Cart';
-        button.classList.remove('opacity-75', 'cursor-not-allowed');
-        button.disabled = false;
-        PopupMessage.error('Error adding product to cart');
-    });
-}
+                PopupMessage.error('Error adding product to cart');
+            });
+    }
 </script>
 @endsection

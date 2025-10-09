@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Order extends Model
 {
@@ -35,6 +36,30 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get formatted total amount.
+     */
+    public function getFormattedTotalAttribute()
+    {
+        return '$' . number_format($this->total_amount, 2);
+    }
+
+    /**
+     * Scope to get orders by status.
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to get orders by date range.
+     */
+    public function scopeByDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
     public static function createFromCart($userId, $shippingAddress, $billingAddress, $shippingDetails = null, $billingDetails = null)
@@ -76,7 +101,7 @@ class Order extends Model
         }
 
         // Use database transaction to ensure data consistency
-        return \DB::transaction(function () use ($orderData, $cartItems) {
+        return DB::transaction(function () use ($orderData, $cartItems) {
             $order = self::create($orderData);
 
             foreach ($cartItems as $cartItem) {
@@ -171,22 +196,6 @@ class Order extends Model
                 $product->reduceStock($item->quantity);
             }
         }
-    }
-
-    /**
-     * Get formatted total amount
-     */
-    public function getFormattedTotalAttribute()
-    {
-        return '$' . number_format($this->total_amount, 2);
-    }
-
-    /**
-     * Scope to get orders by status
-     */
-    public function scopeByStatus($query, $status)
-    {
-        return $query->where('status', $status);
     }
 
     /**

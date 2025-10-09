@@ -13,15 +13,25 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('order_number')->unique();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('order_number')->unique()->index();
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending')->index();
             $table->string('shipping_address');
             $table->string('billing_address');
+            $table->string('phone')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('city')->nullable();
+            $table->string('country')->nullable();
+            $table->string('billing_phone')->nullable();
+            $table->string('billing_postal_code')->nullable();
+            $table->string('billing_city')->nullable();
+            $table->string('billing_country')->nullable();
             $table->timestamps();
             
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->index(['status', 'created_at']);
+            $table->index(['user_id', 'created_at']);
         });
     }
 

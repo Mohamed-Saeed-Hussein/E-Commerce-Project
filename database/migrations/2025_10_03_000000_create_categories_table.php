@@ -13,9 +13,14 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('slug')->unique();
+            $table->string('name')->unique()->index();
+            $table->string('slug')->unique()->index();
+            $table->string('image')->nullable();
             $table->timestamps();
+            
+            // Add indexes for better performance
+            $table->index(['name']);
+            $table->index(['slug']);
         });
     }
 

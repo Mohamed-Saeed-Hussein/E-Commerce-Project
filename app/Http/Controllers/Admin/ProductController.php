@@ -29,15 +29,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|min:2',
-            'price' => 'required|numeric|min:0|max:999999.99',
-            'description' => 'required|string|min:10|max:2000',
-            'quantity' => 'required|integer|min:0|max:999999',
-            'is_available' => 'required|boolean',
-            'image' => 'nullable|url|max:500',
-            'category_id' => 'nullable|exists:categories,id',
-        ], [
+        $request->validate(Product::validationRules(), [
             'name.required' => 'Product name is required',
             'name.min' => 'Product name must be at least 2 characters',
             'name.max' => 'Product name is too long',
@@ -91,15 +83,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|min:2',
-            'price' => 'required|numeric|min:0|max:999999.99',
-            'description' => 'required|string|min:10|max:2000',
-            'quantity' => 'required|integer|min:0|max:999999',
-            'is_available' => 'required|boolean',
-            'image' => 'nullable|url|max:500',
-            'category_id' => 'nullable|exists:categories,id',
-        ], [
+        $request->validate(Product::validationRules(), [
             'name.required' => 'Product name is required',
             'name.min' => 'Product name must be at least 2 characters',
             'name.max' => 'Product name is too long',

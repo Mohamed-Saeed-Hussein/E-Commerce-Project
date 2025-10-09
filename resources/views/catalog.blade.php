@@ -15,13 +15,13 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="text-center mb-8 scroll-animate">
         <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 hover:shadow-lg transition-shadow duration-300">
-            <a href="{{ url('/catalog?category=all') }}" 
-               class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === 'all' ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a href="{{ url('/catalog?category=all') }}"
+                class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === 'all' ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 All
             </a>
             @forelse($categories as $category)
-            <a href="{{ url('/catalog?category=' . $category->slug) }}" 
-               class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === $category->slug ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+            <a href="{{ url('/catalog?category=' . $category->slug) }}"
+                class="filter-btn px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 {{ $selectedCategory === $category->slug ? 'bg-primary-600 text-white hover:bg-primary-700' : 'text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 {{ $category->name }}
             </a>
             @empty
@@ -36,10 +36,10 @@
         <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden scroll-animate group cursor-pointer transform hover:scale-105" onclick="window.location.href='{{ url('/product/' . $product->id) }}'">
             <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                 @if($product->image)
-                <img src="{{ url($product->image) }}" 
-                     alt="{{ $product->name }}" 
-                     class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <img src="{{ url($product->image) }}"
+                    alt="{{ $product->name }}"
+                    class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-full h-full flex items-center justify-center" style="display: none;">
                     <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -62,21 +62,21 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors duration-300">
+            <div class="p-4 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors duration-300 flex flex-col min-h-[160px]">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">{{ $product->name }}</h3>
                 <p class="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">{{ $product->description }}</p>
                 <div class="flex items-center justify-between">
                     <span class="text-2xl font-bold text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors duration-300">${{ number_format($product->price, 2) }}</span>
                     <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">{{ $product->quantity }} in stock</span>
                 </div>
-                <div class="mt-4 flex items-center space-x-2">
+                <div class="mt-auto pt-4 flex items-center space-x-2">
                     <div class="quantity-selector flex items-center border border-gray-300 dark:border-gray-600 rounded-md group-hover:border-primary-300 dark:group-hover:border-primary-600 transition-colors duration-300">
                         <button class="qty-btn minus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation(); decreaseQuantity(this)">-</button>
                         <input type="number" value="1" min="1" max="{{ $product->quantity }}" class="qty-input w-16 text-center border-0 bg-transparent text-gray-900 dark:text-white" readonly>
                         <button class="qty-btn plus px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" type="button" onclick="event.stopPropagation(); increaseQuantity(this)">+</button>
                     </div>
-                    <button class="btn-cart flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105" 
-                            onclick="event.stopPropagation(); addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, this)">
+                    <button class="btn-cart flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                        onclick="event.stopPropagation(); addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, this)">
                         Add to Cart
                     </button>
                 </div>
@@ -97,93 +97,93 @@
 </div>
 
 <script>
-// Quantity selector functionality
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.qty-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('.qty-input');
-            const currentValue = parseInt(input.value);
-            const maxValue = parseInt(input.getAttribute('max'));
-            
-            if (this.classList.contains('plus') && currentValue < maxValue) {
-                input.value = currentValue + 1;
-            } else if (this.classList.contains('minus') && currentValue > 1) {
-                input.value = currentValue - 1;
-            }
+    // Quantity selector functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('.qty-input');
+                const currentValue = parseInt(input.value);
+                const maxValue = parseInt(input.getAttribute('max'));
+
+                if (this.classList.contains('plus') && currentValue < maxValue) {
+                    input.value = currentValue + 1;
+                } else if (this.classList.contains('minus') && currentValue > 1) {
+                    input.value = currentValue - 1;
+                }
+            });
         });
     });
-});
 
-// Add to cart functionality
-function addToCart(productId, productName, price, button) {
-    const quantityInput = button.parentElement.querySelector('.qty-input');
-    const quantity = parseInt(quantityInput.value);
-    
-    // Check if user is logged in
-    @if(!session('auth.user_id'))
+    // Add to cart functionality
+    function addToCart(productId, productName, price, button) {
+        const quantityInput = button.parentElement.querySelector('.qty-input');
+        const quantity = parseInt(quantityInput.value);
+
+        // Check if user is logged in
+        @if(!session('auth.user_id'))
         PopupMessage.error('Please log in to add items to cart');
         return;
-    @endif
-    
-    // Add to cart via AJAX
-    fetch('{{ url("/cart/add") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            product_id: productId,
-            quantity: quantity
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success popup
-            PopupMessage.success('Product added to cart!');
-            
-            // Update button state
-            button.textContent = 'Added!';
-            button.classList.add('bg-green-600', 'hover:bg-green-700');
-            button.classList.remove('bg-primary-600', 'hover:bg-primary-700');
-            
-            setTimeout(() => {
-                button.textContent = 'Add to Cart';
-                button.classList.remove('bg-green-600', 'hover:bg-green-700');
-                button.classList.add('bg-primary-600', 'hover:bg-primary-700');
-            }, 2000);
-            
-            // Update cart count if element exists
-            const cartCount = document.getElementById('cartCount');
-            if (cartCount) {
-                cartCount.textContent = data.cart_count;
-            }
-        } else {
-            PopupMessage.error(data.message || 'Error adding product to cart');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        PopupMessage.error('Error adding product to cart');
-    });
-}
+        @endif
 
-// Update cart count
-function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    // Update cart count in navbar if it exists
-    const cartCountElement = document.getElementById('cart-count');
-    if (cartCountElement) {
-        cartCountElement.textContent = totalItems;
+        // Add to cart via AJAX
+        fetch('{{ url("/cart/add") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success popup
+                    PopupMessage.success('Product added to cart!');
+
+                    // Update button state
+                    button.textContent = 'Added!';
+                    button.classList.add('bg-green-600', 'hover:bg-green-700');
+                    button.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+
+                    setTimeout(() => {
+                        button.textContent = 'Add to Cart';
+                        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        button.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                    }, 2000);
+
+                    // Update cart count if element exists
+                    const cartCount = document.getElementById('cartCount');
+                    if (cartCount) {
+                        cartCount.textContent = data.cart_count;
+                    }
+                } else {
+                    PopupMessage.error(data.message || 'Error adding product to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                PopupMessage.error('Error adding product to cart');
+            });
     }
-}
 
-// Initialize cart count on page load
-document.addEventListener('DOMContentLoaded', function() {
-    updateCartCount();
-});
+    // Update cart count
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Update cart count in navbar if it exists
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            cartCountElement.textContent = totalItems;
+        }
+    }
+
+    // Initialize cart count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
 </script>
 @endsection

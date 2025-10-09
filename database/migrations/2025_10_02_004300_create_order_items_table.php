@@ -16,12 +16,16 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('product_id');
             $table->string('product_name');
-            $table->integer('quantity');
+            $table->integer('quantity')->default(1);
             $table->decimal('price', 10, 2);
             $table->timestamps();
             
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            
+            // Add indexes for better performance
+            $table->index(['order_id']);
+            $table->index(['product_id']);
         });
     }
 

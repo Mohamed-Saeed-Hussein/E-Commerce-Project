@@ -20,10 +20,21 @@ class ContactController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|min:2|regex:/^[a-zA-Z\s]+$/',
             'email' => 'required|email|max:255',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
+            'subject' => 'required|string|max:255|min:5',
+            'message' => 'required|string|min:10|max:2000',
+        ], [
+            'name.required' => 'Name is required',
+            'name.min' => 'Name must be at least 2 characters',
+            'name.regex' => 'Name must contain only letters and spaces',
+            'email.required' => 'Email is required',
+            'email.email' => 'Please enter a valid email address',
+            'subject.required' => 'Subject is required',
+            'subject.min' => 'Subject must be at least 5 characters',
+            'message.required' => 'Message is required',
+            'message.min' => 'Message must be at least 10 characters',
+            'message.max' => 'Message is too long (maximum 2000 characters)',
         ]);
 
         Message::create([
